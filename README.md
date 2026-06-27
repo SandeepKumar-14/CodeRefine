@@ -119,5 +119,5 @@ The project is split into:
 ## Notes
 
 - This project is intentionally minimal in tooling (no build step) so you can explore and extend it easily.
-- If you change the backend port or host, update `API_BASE` in `frontend/main.js`.
+- If you change the backend port or host, update `API_BASE` in `frontend/main.js` .
 
