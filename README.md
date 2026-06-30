@@ -79,7 +79,7 @@ The project is split into:
 
    - Option B: double-click `index.html` and open it directly. Some browsers may block cross-origin calls when opened as a `file://` URL, so a local HTTP server is usually more reliable.
 
-3. Make sure the backend is running at `http://localhost:8000` (this is what the frontend expects by default; you can change `API_BASE` in `frontend/main.js` if needed).
+3. Make sure the backend is running at `http://coderefine-backend-8vtw.onrender.com` (this is what the frontend expects by default; you can change `API_BASE` in `frontend/main.js` if needed).
 
 ---
 
