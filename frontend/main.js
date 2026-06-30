@@ -3,7 +3,7 @@
    ────────────────────────────────────────────────────────────── */
 
 const FRONTEND_CONFIG = window.CODEREFINE_CONFIG || {};
-const API_BASE        = FRONTEND_CONFIG.API_BASE         || "http://coderefine-backend-8vtw.onrender.com";
+const API_BASE        = FRONTEND_CONFIG.API_BASE         || "https://coderefine-backend-8vtw.onrender.com";
 const SUPABASE_URL    = FRONTEND_CONFIG.SUPABASE_URL     || "";
 const SUPABASE_ANON_KEY = FRONTEND_CONFIG.SUPABASE_ANON_KEY || "";
 
