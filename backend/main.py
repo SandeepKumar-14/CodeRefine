@@ -356,3 +356,10 @@ def chat_about_code(payload: ChatRequest, user = Depends(get_current_user)) -> C
 def health():
     return {"status": "ok"}
 
+@app.get("/")
+def root():
+    return {"message": "CodeRefine API is running"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
