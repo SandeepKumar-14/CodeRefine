@@ -182,7 +182,7 @@ def get_goal_specific_prompt(goal: str) -> tuple:
 
 
 @app.post("/api/refine", response_model=RefineResponse)
-def refine_code(payload: RefineRequest, user = Depends(get_current_user)) -> RefineResponse:
+def refine_code(payload: RefineRequest) -> RefineResponse:
     client = get_groq_client()
 
     system_prompt, instruction = get_goal_specific_prompt(payload.goal)
@@ -301,9 +301,8 @@ def analyze_complexity(payload: RefineRequest, user = Depends(get_current_user))
         explanation=explanation
     )
 
-
 @app.post("/api/chat", response_model=ChatResponse)
-def chat_about_code(payload: ChatRequest, user = Depends(get_current_user)) -> ChatResponse:
+def chat_about_code(payload: ChatRequest) -> ChatResponse:
     client = get_groq_client()
 
     messages = [
