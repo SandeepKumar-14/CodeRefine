@@ -13,9 +13,18 @@ load_dotenv()
 
 app = FastAPI(title="Coderefine API", version="0.1.0")
 
+# Build the list of allowed CORS origins from an environment variable.
+# In production (Render), set: ALLOWED_ORIGINS=https://your-app.vercel.app
+# Locally, leave it unset to default to ["*"] (same behaviour as before).
+_allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "*")
+if _allowed_origins_raw.strip() == "*":
+    _allowed_origins = ["*"]
+else:
+    _allowed_origins = [o.strip() for o in _allowed_origins_raw.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
