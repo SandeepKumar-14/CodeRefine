@@ -18,7 +18,7 @@
    ────────────────────────────────────────────────────────────── */
 
 window.CODEREFINE_CONFIG = {
-  API_BASE:         "https://YOUR-RENDER-APP.onrender.com",
-  SUPABASE_URL:     "https://mchcrkbefnfbyydowwkc.supabase.co",
+  API_BASE: "https://coderefine-vs4r.onrender.com",
+  SUPABASE_URL: "https://mchcrkbefnfbyydowwkc.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_s78PkUIb1q7xoB_AODibtQ_LYI7BMSe"
 };
