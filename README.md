@@ -121,3 +121,16 @@ The project is split into:
 - This project is intentionally minimal in tooling (no build step) so you can explore and extend it easily.
 - If you change the backend port or host, update `API_BASE` in `frontend/main.js` .
 
+---
+
+## Credits
+
+Original project by Ashh696.
+
+This repository contains additional modifications and improvements by Sandeep Kumar (SandeepKumar-14).
+
+### Modifications and Improvements:
+- **Authentication System**: Integrated Supabase Auth with support for Email/Password, Google OAuth, and GitHub OAuth sign-in and sign-up flows.
+- **Modern Auth UI**: Designed a completely new, responsive authentication page (`auth.html`) featuring glassmorphism effects, floating orbs, and animated particle backgrounds.
+- **Mobile Responsiveness**: Extensively updated the application layout (`app.html` & `styles.css`) for seamless mobile usage, including a collapsible sidebar drawer, a two-row responsive top bar, and a bottom-sheet layout for the AI assistant.
+- **Branding**: Created and added an SVG favicon (`favicon.svg`) to all HTML pages for better brand presence in browser tabs.
