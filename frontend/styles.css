@@ -3065,19 +3065,132 @@ html[data-theme="nebula"] .ai-panel {
   display: block;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
+  /* ── TOPBAR: wrap into two rows ── */
+  .app-topbar {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .topbar-brand {
+    order: 1;
+    gap: 6px;
+  }
+
+  .topbar-brand .brand-title {
+    font-size: 0.82rem;
+  }
+
+  .brand-badge {
+    display: none;
+  }
+
+  /* Move actions (Format, Save, Load, Refine, Sign Out) to end of first row */
+  .topbar-actions {
+    order: 2;
+    gap: 2px;
+    margin-left: auto;
+  }
+
+  /* Hide text labels on Format/Save/Load — show only icons */
+  .topbar-btn {
+    padding: 6px 8px;
+    font-size: 0;
+    gap: 0;
+    border: none;
+  }
+
+  .topbar-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .topbar-btn-subtle {
+    font-size: 0;
+  }
+
+  /* Keep Refine button text visible but shorter */
+  .refine-btn {
+    font-size: 0.72rem !important;
+    padding: 5px 10px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  /* Dividers between actions become thinner */
+  .topbar-divider {
+    height: 20px;
+    margin: 0 2px;
+  }
+
+  .topbar-status {
+    order: 3;
+  }
+
+  /* Status indicator */
+  #status-indicator {
+    display: none;
+  }
+
+  /* Controls row: Language + Objective dropdowns take full width below */
+  .topbar-controls {
+    order: 4;
+    width: 100%;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .control-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ctrl-label {
+    display: none;
+  }
+
+  .control-group .select {
+    width: 100%;
+    min-width: 0 !important;
+    font-size: 0.72rem;
+    padding: 4px 6px;
+  }
+
+  /* Hide the divider between controls and status on mobile */
+  .topbar-controls > .topbar-divider {
+    display: none;
+  }
+
+  /* ── EDITOR TABSTRIP ── */
+  .editor-tabstrip {
+    height: 34px;
+  }
+
+  .file-tab {
+    padding: 0 10px;
+    font-size: 0.72rem;
+  }
+
+  /* Hide metrics chips on mobile — they don't fit */
+  .tabstrip-metrics {
+    display: none;
+  }
+
+  /* ── LEFT SIDEBAR: slide-in drawer ── */
   .left-sidebar {
     position: fixed;
     left: 0;
-    top: 52px;
-    bottom: 24px;
+    top: 0;
+    bottom: 0;
     z-index: 100;
     transform: translateX(-100%);
     opacity: 1 !important;
-    width: 240px !important;
-    border-radius: 0 12px 12px 0;
-    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 260px !important;
+    border-radius: 0 14px 14px 0;
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .left-sidebar.sidebar-open {
@@ -3086,5 +3199,127 @@ html[data-theme="nebula"] .ai-panel {
 
   .left-sidebar.sidebar-collapsed {
     transform: translateX(-100%) !important;
+  }
+
+  /* ── APP-BODY: stack editor and AI panel vertically ── */
+  .app-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .editor-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    min-height: 200px;
+  }
+
+  /* Show AI panel as a collapsible bottom sheet on mobile */
+  .ai-panel {
+    display: flex !important;
+    max-height: 40vh;
+    min-height: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .ai-tabs {
+    padding: 4px 6px;
+    gap: 1px;
+  }
+
+  .ai-tab {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+
+  .ai-tab svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .ai-body {
+    padding: 8px;
+  }
+
+  .chat-welcome {
+    padding: 12px 8px 4px;
+  }
+
+  .chat-welcome-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .chat-welcome-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .chat-welcome p {
+    font-size: 0.75rem;
+  }
+
+  .chat-composer textarea {
+    font-size: 0.78rem;
+    min-height: 30px;
+  }
+
+  /* ── STATUSBAR ── */
+  .app-statusbar {
+    height: 22px;
+  }
+
+  .sb-item {
+    font-size: 0.6rem;
+    padding: 0 6px;
+  }
+
+  .sb-right {
+    display: none;
+  }
+}
+
+/* Extra-small screens (≤ 480px) */
+@media (max-width: 480px) {
+  .app-topbar {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+
+  .topbar-brand .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    font-size: 9px;
+  }
+
+  .topbar-brand .brand-title {
+    font-size: 0.75rem;
+  }
+
+  /* Refine button: icon only on tiny screens */
+  .refine-btn {
+    font-size: 0 !important;
+    padding: 6px 8px !important;
+    gap: 0 !important;
+  }
+
+  .refine-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .control-group .select {
+    font-size: 0.68rem;
+    padding: 3px 4px;
+  }
+
+  .ai-panel {
+    max-height: 35vh;
+  }
+
+  .left-sidebar {
+    width: 220px !important;
   }
 }
