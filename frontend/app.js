@@ -857,6 +857,8 @@ function applyInsights(summary, suggestions) {
   var summaryEl = document.getElementById("insights-summary");
   var filtersEl = document.getElementById("insights-filters");
   var emptyEl   = document.querySelector(".insights-empty");
+  var compEl    = document.getElementById("insights-complexity");
+  if (compEl)   compEl.innerHTML = "";
   if (emptyEl)  emptyEl.style.display = "none";
   if (summaryEl) {
     summaryEl.style.display = "block";
@@ -991,10 +993,10 @@ function fetchAndDisplayComplexity(code, headers) {
 }
 
 function displayComplexityAnalysis(complexityData) {
-  var listEl = document.getElementById("insights-list");
+  var listEl = document.getElementById("insights-complexity");
   if (!listEl) return;
   
-  // Add complexity info as list items at the top
+  // Add complexity info as list items
   var complexityHtml = 
     '<li style="font-weight: 600; color: var(--accent); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">⏱ Time Complexity: ' + 
     complexityData.time_complexity + '</li>' +
@@ -1006,7 +1008,7 @@ function displayComplexityAnalysis(complexityData) {
       complexityData.explanation + '</li>';
   }
   
-  listEl.insertAdjacentHTML("beforeend", complexityHtml);
+  listEl.innerHTML = complexityHtml;
 }
 
 /* ── CHAT FORM ─────────────────────────────────────────────── */

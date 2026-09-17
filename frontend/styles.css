@@ -2674,11 +2674,11 @@ html[data-theme="nebula"] .ai-panel {
 }
 
 .ai-body-hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(10px);
-  position: absolute;
-  visibility: hidden;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px) !important;
+  position: absolute !important;
+  visibility: hidden !important;
 }
 
 .ai-body {
