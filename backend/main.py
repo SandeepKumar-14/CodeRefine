@@ -197,7 +197,7 @@ def refine_code(payload: RefineRequest, user = Depends(get_current_user)) -> Ref
     system_prompt, instruction = get_goal_specific_prompt(payload.goal)
 
     chat_completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": system_prompt},
             {
@@ -214,7 +214,7 @@ def refine_code(payload: RefineRequest, user = Depends(get_current_user)) -> Ref
     refined_code = chat_completion.choices[0].message.content
 
     explanation_completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": "Explain code refinements briefly and list concrete suggestions."},
             {
@@ -266,7 +266,7 @@ def analyze_complexity(payload: RefineRequest, user = Depends(get_current_user))
     )
     
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": complexity_prompt},
             {
@@ -338,7 +338,7 @@ def chat_about_code(payload: ChatRequest, user = Depends(get_current_user)) -> C
         messages.append({"role": m.role, "content": m.content})
 
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=messages,
     )
 
