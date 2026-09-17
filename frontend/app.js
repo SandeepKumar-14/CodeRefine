@@ -823,9 +823,39 @@ function initSidePanelTabs() {
 }
 
 /* ── INSIGHTS ──────────────────────────────────────────────── */
+window.currentInsights = [];
+
+function renderInsightsList(filterSeverity = null) {
+  var listEl = document.getElementById("insights-list");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  
+  var filtered = window.currentInsights.filter(function(item) {
+    if (!filterSeverity) return true;
+    return item.severity === filterSeverity;
+  });
+
+  filtered.forEach(function(item, i) {
+    var li = document.createElement("li");
+    li.style.animationDelay = (i * 0.05) + "s";
+    
+    if (item.severity !== "NONE") {
+      var badgeClass = "severity-low";
+      if (item.severity === "CRITICAL") badgeClass = "severity-critical";
+      else if (item.severity === "HIGH") badgeClass = "severity-high";
+      
+      var badgeHtml = "<span class='severity-badge " + badgeClass + "'>" + item.severity + "</span>";
+      li.innerHTML = badgeHtml + " " + item.text;
+    } else {
+      li.textContent = item.text;
+    }
+    listEl.appendChild(li);
+  });
+}
+
 function applyInsights(summary, suggestions) {
   var summaryEl = document.getElementById("insights-summary");
-  var listEl    = document.getElementById("insights-list");
+  var filtersEl = document.getElementById("insights-filters");
   var emptyEl   = document.querySelector(".insights-empty");
   if (emptyEl)  emptyEl.style.display = "none";
   if (summaryEl) {
@@ -834,16 +864,49 @@ function applyInsights(summary, suggestions) {
     summaryEl.style.animation = "none";
     requestAnimationFrame(function() { summaryEl.style.animation = "chatIn 0.3s ease both"; });
   }
-  if (listEl) {
-    listEl.innerHTML = "";
-    (suggestions || []).forEach(function(s, i) {
-      var li = document.createElement("li");
-      li.textContent = s;
-      li.style.animationDelay = (i * 0.06) + "s";
-      listEl.appendChild(li);
-    });
+  if (filtersEl) {
+    filtersEl.style.display = "flex";
+    // Reset filters
+    document.querySelectorAll(".filter-btn").forEach(function(b) { b.classList.remove("active"); });
   }
+
+  // Parse tags
+  window.currentInsights = (suggestions || []).map(function(s) {
+    var match = s.match(/^\[(.*?)\]/);
+    if (match) {
+      return { severity: match[1].toUpperCase(), text: s.substring(match[0].length).trim() };
+    }
+    return { severity: "NONE", text: s };
+  });
+
+  renderInsightsList();
   switchAIPanel("insights");
+}
+
+function initInsightsFilters() {
+  document.querySelectorAll(".filter-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var isActive = this.classList.contains("active");
+      
+      // Animate out existing items
+      var listItems = document.querySelectorAll("#insights-list li");
+      listItems.forEach(function(li) { li.classList.add("fade-out-slide"); });
+      
+      // Clear all active
+      document.querySelectorAll(".filter-btn").forEach(function(b) { b.classList.remove("active"); });
+      
+      var severityToFilter = null;
+      if (!isActive) {
+        this.classList.add("active");
+        severityToFilter = this.getAttribute("data-severity");
+      }
+      
+      // Wait for fade out, then render new
+      setTimeout(function() {
+        renderInsightsList(severityToFilter);
+      }, 300); // matches fadeOutSlide animation duration
+    });
+  });
 }
 
 /* ── REFINE BUTTON ─────────────────────────────────────────── */
@@ -1395,6 +1458,7 @@ function startApp() {
   initSidebar();
   initProfileMenu();
   initRefineButton();
+  initInsightsFilters();
   initChatForm();
   initFormatButton();
   initDiffButton();

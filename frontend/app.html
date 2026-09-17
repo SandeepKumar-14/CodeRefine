@@ -29,7 +29,7 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <div class="brand-mark">CR</div>
+        <div class="brand-mark brand-text">ERROR FREE</div>
         <span class="brand-title">Coderefine</span>
         <span class="brand-badge">AI Workbench</span>
       </div>
@@ -354,6 +354,11 @@
               <p>Run a refinement to see detailed insights and improvement suggestions here.</p>
             </div>
             <div id="insights-summary" class="insights-summary" style="display:none;"></div>
+            <div id="insights-filters" class="insights-filters" style="display:none;">
+              <button class="filter-btn filter-critical" data-severity="CRITICAL">Critical</button>
+              <button class="filter-btn filter-high" data-severity="HIGH">High</button>
+              <button class="filter-btn filter-low" data-severity="LOW">Low</button>
+            </div>
             <ul id="insights-list" class="insights-list"></ul>
           </div>
 

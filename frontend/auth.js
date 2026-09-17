@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const btn = document.getElementById("btn-login-submit");
       btn.disabled = true;
+      btn.classList.add("loading");
       btn.textContent = "Signing in…";
 
       try {
@@ -84,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (error) {
           showMessage("❌ " + error.message);
           btn.disabled = false;
+          btn.classList.remove("loading");
           btn.textContent = "Sign In";
         } else {
           // Store remember me preference in localStorage
@@ -99,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         showMessage("❌ Sign in failed: " + err.message);
         btn.disabled = false;
+        btn.classList.remove("loading");
         btn.textContent = "Sign In";
       }
     });
@@ -127,13 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const btn = document.getElementById("btn-signup-submit");
       btn.disabled = true;
-      btn.textContent = "Creating account…";
+      btn.classList.add("loading");
+      btn.textContent = "Creating Account…";
 
       try {
         const { error } = await supabaseClient.auth.signUp({ email, password });
-        btn.disabled = false;
-        btn.textContent = "Sign Up";
-        
         if (error) {
           showMessage("❌ " + error.message);
         } else {
@@ -158,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const btn = document.getElementById("btn-forgot-submit");
       btn.disabled = true;
+      btn.classList.add("loading");
       btn.textContent = "Sending…";
 
       try {
