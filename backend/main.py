@@ -216,24 +216,25 @@ def refine_code(payload: RefineRequest, user = Depends(get_current_user)) -> Ref
     explanation_completion = client.chat.completions.create(
         model="openai/gpt-oss-120b",
         messages=[
-            {"role": "system", "content": "Explain code refinements briefly and list concrete suggestions."},
+            {"role": "system", "content": "Explain code refinements briefly and list concrete suggestions. You MUST assign a clear severity tag like [CRITICAL], [HIGH], [MEDIUM], or [LOW] to every issue. Ensure your output uses categorized sections (e.g., Bugs, Vulnerabilities, Code Smells)."},
             {
                 "role": "user",
                 "content": (
                     f"Language: {payload.language}\n\n"
                     f"Original code:\n{payload.code}\n\n"
                     f"Refined code:\n{refined_code}\n\n"
-                    "Summarize the key improvements in 2–3 sentences, "
-                    "then provide a short bullet list of concrete suggestions."
+                    "First, summarize the key improvements in 1-2 sentences on the very first line.\n"
+                    "Then, provide a bullet list of concrete issues found, categorized by type (Bugs, Vulnerabilities, Code Smells).\n"
+                    "For every bullet point, start with a severity tag (e.g., [HIGH] Null pointer...)."
                 ),
             },
         ],
     )
 
     explanation = explanation_completion.choices[0].message.content
-    lines = [line.strip(" -") for line in explanation.splitlines() if line.strip()]
+    lines = [line.strip(" -*#") for line in explanation.splitlines() if line.strip()]
     summary = lines[0] if lines else "Refinement complete."
-    suggestions = lines[1:6] if len(lines) > 1 else []
+    suggestions = lines[1:] if len(lines) > 1 else []
 
     supabase = get_supabase_client()
     if supabase:
