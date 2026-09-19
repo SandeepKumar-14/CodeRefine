@@ -88,6 +88,12 @@
             </svg>
             Load
           </button>
+          <button id="btn-run" class="topbar-btn run-action-btn" title="Run Code (Ctrl+Shift+Enter)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Run
+          </button>
           <div class="topbar-divider"></div>
           <!-- Refine CTA -->
           <button id="btn-refine" class="btn btn-primary refine-btn">
@@ -292,6 +298,34 @@
 
           <!-- Monaco editor -->
           <div id="editor-container" class="monaco-editor-wrap"></div>
+          
+          <!-- Run Output Panel -->
+          <div id="run-panel" class="run-panel" style="display: none;">
+            <div class="run-panel-header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span class="run-panel-title">Run Output</span>
+              </div>
+              <button class="run-panel-close" id="btn-close-run" title="Close Panel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="run-panel-body">
+              <div class="run-input-section">
+                <label>Input (stdin)</label>
+                <textarea id="run-input" placeholder="Enter standard input here..."></textarea>
+              </div>
+              <div class="run-output-section">
+                <label>Output</label>
+                <pre id="run-output" class="run-output"></pre>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- MIDDLE: Resize Handle -->

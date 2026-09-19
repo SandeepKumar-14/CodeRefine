@@ -3787,3 +3787,99 @@ html[data-theme="nebula"] .ai-panel {
   filter: brightness(1.1);
   transform: translateY(-1px) scale(1.02);
 }
+
+/* -- RUN PANEL ----------------------------------------------- */
+.run-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  height: 250px;
+  flex-shrink: 0;
+  transition: height 0.2s ease-in-out;
+  overflow: hidden;
+}
+.run-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.run-panel-close {
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.run-panel-close:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.1);
+}
+.run-panel-body {
+  display: flex;
+  flex-direction: row;
+  height: calc(100% - 37px);
+}
+.run-input-section, .run-output-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+.run-input-section {
+  border-right: 1px solid var(--border);
+}
+.run-input-section label, .run-output-section label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.run-input-section textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px;
+  resize: none;
+}
+.run-input-section textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.run-output {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin: 0;
+}
+.run-output.error {
+  color: #f43f5e;
+}
+.run-action-btn.running svg {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+

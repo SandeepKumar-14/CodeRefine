@@ -49,6 +49,10 @@ function createTab(filename = null, language = "python") {
     code: "# Paste or type code here to refine it.\n\n",
     originalCode: "",
     refinedCode: "",
+    runInput: "",
+    runOutput: "",
+    isRunPanelOpen: false,
+    runOutputError: false,
     chatHistory: [],
     insightsHtml: { summary: "", list: "", complexity: "" },
     chatHtml: "",
@@ -102,6 +106,14 @@ function switchTab(id) {
         complexity: complexityEl ? complexityEl.innerHTML : ""
       };
       oldTab.chatHtml = threadEl ? threadEl.innerHTML : "";
+      
+      const runInput = document.getElementById("run-input");
+      const runOutput = document.getElementById("run-output");
+      if (runInput) oldTab.runInput = runInput.value;
+      if (runOutput) {
+        oldTab.runOutput = runOutput.textContent;
+        oldTab.runOutputError = runOutput.classList.contains("error");
+      }
     }
   }
   
@@ -152,6 +164,21 @@ function switchTab(id) {
     const hasInsights = newTab.insightsHtml.summary || newTab.insightsHtml.list;
     if (emptyInsightsEl) emptyInsightsEl.style.display = hasInsights ? "none" : "flex";
     if (filtersEl) filtersEl.style.display = hasInsights ? "flex" : "none";
+    
+    const runPanel = document.getElementById("run-panel");
+    const runInput = document.getElementById("run-input");
+    const runOutput = document.getElementById("run-output");
+    
+    if (runInput) runInput.value = newTab.runInput || "";
+    if (runOutput) {
+      runOutput.textContent = newTab.runOutput || "";
+      if (newTab.runOutputError) runOutput.classList.add("error");
+      else runOutput.classList.remove("error");
+    }
+    
+    if (runPanel) {
+      runPanel.style.display = newTab.isRunPanelOpen ? "flex" : "none";
+    }
     
     updateMetrics();
     switchAIPanel(newTab.activePanel || "assistant");
@@ -1597,6 +1624,103 @@ function initDiffButton() {
   button.addEventListener("click", openDiffViewer);
 }
 
+/* ── RUN CODE ──────────────────────────────────────────────── */
+function initRunButton() {
+  const btnRun = document.getElementById("btn-run");
+  const runPanel = document.getElementById("run-panel");
+  const runInput = document.getElementById("run-input");
+  const runOutput = document.getElementById("run-output");
+  const btnCloseRun = document.getElementById("btn-close-run");
+  
+  if (btnCloseRun) {
+    btnCloseRun.addEventListener("click", () => {
+      runPanel.style.display = "none";
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab) tab.isRunPanelOpen = false;
+    });
+  }
+
+  async function executeCode() {
+    if (!editor || !btnRun) return;
+    
+    const code = editor.getValue().trim();
+    if (!code || code === "# Paste or type code here to refine it.") {
+      showToast("Add some code to run.", "warning");
+      return;
+    }
+    
+    const tab = tabs.find(t => t.id === activeTabId);
+    if (tab) tab.isRunPanelOpen = true;
+    
+    if (runPanel.style.display === "none") {
+      runPanel.style.display = "flex";
+    }
+    
+    runOutput.textContent = "Running...";
+    runOutput.classList.remove("error");
+    btnRun.classList.add("running");
+    btnRun.disabled = true;
+    
+    try {
+      const token = await getAuthToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = "Bearer " + token;
+      
+      const res = await fetch(API_BASE + "/api/execute", {
+        method: "POST", headers: headers,
+        body: JSON.stringify({
+          code: code,
+          language: currentLanguage,
+          stdin: runInput.value
+        })
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(()=>({}));
+        throw new Error(errData.detail || "HTTP " + res.status);
+      }
+      
+      const data = await res.json();
+      
+      if (data.stderr) {
+        runOutput.textContent = data.stderr;
+        runOutput.classList.add("error");
+        if (tab) tab.runOutputError = true;
+      } else {
+        runOutput.textContent = data.stdout || "(No output)";
+        runOutput.classList.remove("error");
+        if (tab) tab.runOutputError = false;
+      }
+      
+      if (tab) tab.runOutput = runOutput.textContent;
+      
+    } catch(err) {
+      console.error(err);
+      runOutput.textContent = err.message || "Failed to execute code.";
+      runOutput.classList.add("error");
+      if (tab) {
+        tab.runOutputError = true;
+        tab.runOutput = runOutput.textContent;
+      }
+    } finally {
+      btnRun.classList.remove("running");
+      btnRun.disabled = false;
+    }
+  }
+
+  if (btnRun) {
+    btnRun.addEventListener("click", executeCode);
+  }
+  
+  // Ctrl+Shift+Enter handler
+  document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === "Enter") {
+      e.preventDefault();
+      executeCode();
+    }
+  });
+}
+
 /* ── SAVE / LOAD ───────────────────────────────────────────── */
 function initSaveLoadButtons() {
   var saveBtn = document.getElementById("btn-save");
@@ -1962,6 +2086,7 @@ function startApp() {
   initChatForm();
   initFormatButton();
   initDiffButton();
+  initRunButton();
   initSaveLoadButtons();
   initGlobalKeyboardShortcuts();
   initResizer();
