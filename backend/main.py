@@ -465,82 +465,56 @@ def chat_vision(payload: ChatVisionRequest, user = Depends(get_current_user)) ->
     return ChatResponse(reply=reply)
 
 
-PISTON_API = "https://emkc.org/api/v2/piston"
-PISTON_RUNTIME_CACHE = []
-
-@app.get("/api/runtimes")
-async def get_runtimes():
-    global PISTON_RUNTIME_CACHE
-    if PISTON_RUNTIME_CACHE:
-        return PISTON_RUNTIME_CACHE
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get(f"{PISTON_API}/runtimes")
-            resp.raise_for_status()
-            PISTON_RUNTIME_CACHE = resp.json()
-            return PISTON_RUNTIME_CACHE
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch runtimes: {str(e)}")
-
+JDOODLE_API = "https://api.jdoodle.com/v1/execute"
 
 @app.post("/api/execute", response_model=ExecuteResponse)
 async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)):
-    global PISTON_RUNTIME_CACHE
-    if not PISTON_RUNTIME_CACHE:
-        await get_runtimes()
+    client_id = os.getenv("JDOODLE_CLIENT_ID")
+    client_secret = os.getenv("JDOODLE_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=500, detail="JDoodle credentials not configured on the server.")
         
     lang_map = {
-        "python": "python",
-        "javascript": "javascript",
-        "java": "java",
-        "c": "c",
-        "cpp": "cpp",
-        "rust": "rust"
+        "python": {"language": "python3", "versionIndex": "6"},
+        "javascript": {"language": "nodejs", "versionIndex": "3"},
+        "java": {"language": "java", "versionIndex": "4"},
+        "c": {"language": "c", "versionIndex": "7"},
+        "cpp": {"language": "cpp", "versionIndex": "8"},
+        "rust": {"language": "rust", "versionIndex": "6"}
     }
     
-    piston_lang = lang_map.get(payload.language.lower())
-    if not piston_lang:
-        raise HTTPException(status_code=400, detail=f"Language '{payload.language}' is not mapped.")
-        
-    version = None
-    for r in PISTON_RUNTIME_CACHE:
-        if r["language"] == piston_lang or piston_lang in r.get("aliases", []):
-            version = r["version"]
-            break
-            
-    if not version:
-        raise HTTPException(status_code=400, detail=f"Language '{piston_lang}' is not supported by Piston.")
+    jdoodle_lang = lang_map.get(payload.language.lower())
+    if not jdoodle_lang:
+        raise HTTPException(status_code=400, detail=f"Language '{payload.language}' is not mapped for JDoodle.")
         
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(
-                f"{PISTON_API}/execute",
+                JDOODLE_API,
                 json={
-                    "language": piston_lang,
-                    "version": version,
-                    "files": [{"content": payload.code}],
+                    "clientId": client_id,
+                    "clientSecret": client_secret,
+                    "script": payload.code,
+                    "language": jdoodle_lang["language"],
+                    "versionIndex": jdoodle_lang["versionIndex"],
                     "stdin": payload.stdin or ""
                 }
             )
             resp.raise_for_status()
             data = resp.json()
             
-            run_stage = data.get("run", {})
-            compile_stage = data.get("compile", {})
+            if "error" in data:
+                return ExecuteResponse(stdout="", stderr=data["error"], exit_code=1)
+                
+            stdout = data.get("output", "")
             
-            stdout = run_stage.get("stdout", "")
-            stderr = run_stage.get("stderr", "")
-            if compile_stage and compile_stage.get("stderr"):
-                stderr = compile_stage.get("stderr") + "\n" + stderr
-                
-            code = run_stage.get("code", 0)
-            if compile_stage and compile_stage.get("code", 0) != 0:
-                code = compile_stage.get("code")
-                
-            return ExecuteResponse(stdout=stdout, stderr=stderr, exit_code=code or 0)
+            return ExecuteResponse(stdout=stdout, stderr="", exit_code=0)
             
     except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Execution timed out after 10 seconds.")
+        raise HTTPException(status_code=504, detail="Execution timed out after 15 seconds.")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=f"JDoodle API error: {e.response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
 
