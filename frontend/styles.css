@@ -1551,6 +1551,14 @@ body::before {
   max-width: 200px;
 }
 
+.chat-attachment-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #000;
+}
+
 .chat-attachment-remove {
   background: transparent;
   border: none;

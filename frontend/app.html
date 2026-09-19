@@ -349,11 +349,12 @@
             <div id="chat-thread" class="chat-thread"></div>
             <form id="chat-form" class="chat-composer">
               <!-- Hidden file input -->
-              <input type="file" id="chat-file-input" accept=".txt,.pdf,.docx" style="display:none;" />
+              <input type="file" id="chat-file-input" accept=".txt,.pdf,.docx,.jpg,.jpeg,.png" style="display:none;" />
               
               <!-- Preview chip for attached file -->
               <div id="chat-attachment-preview" class="chat-attachment-preview" style="display:none;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <img id="chat-attachment-img" class="chat-attachment-img" style="display:none;" alt="thumbnail" />
+                <svg id="chat-attachment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                   <polyline points="13 2 13 9 20 9"></polyline>
                 </svg>

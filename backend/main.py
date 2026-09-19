@@ -58,6 +58,11 @@ class ChatResponse(BaseModel):
     reply: str
 
 
+class ChatVisionRequest(ChatRequest):
+    image_base64: str
+    image_question: str
+
+
 class ComplexityAnalysisResponse(BaseModel):
     time_complexity: str
     space_complexity: str
@@ -367,6 +372,68 @@ def chat_about_code(payload: ChatRequest, user = Depends(get_current_user)) -> C
     )
 
     reply = completion.choices[0].message.content
+
+    supabase = get_supabase_client()
+    if supabase:
+        try:
+            supabase.table("chats").insert(
+                {
+                    "language": payload.language,
+                    "code_context": payload.code_context,
+                    "messages": [m.model_dump() for m in payload.messages],
+                    "reply": reply,
+                }
+            ).execute()
+        except Exception:
+            pass
+
+    return ChatResponse(reply=reply)
+
+
+@app.post("/api/chat_vision", response_model=ChatResponse)
+def chat_vision(payload: ChatVisionRequest, user = Depends(get_current_user)) -> ChatResponse:
+    client = get_groq_client()
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are Coderefine's code assistant with vision capabilities. "
+                "You answer questions about the provided code context and the uploaded image. "
+                "Explain behavior, suggest improvements, and help debug while being concise."
+            ),
+        }
+    ]
+
+    # Prepend chat history context (excluding the image message itself if it's already there)
+    for m in payload.messages[:-1]:
+        messages.append({"role": m.role, "content": m.content})
+        
+    # Append the image block
+    messages.append({
+        "role": "user",
+        "content": [
+            {
+                "type": "text", 
+                "text": f"Language: {payload.language}\nCode context:\n{payload.code_context}\n\nHere's an image the user uploaded. User's message: {payload.image_question}"
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": payload.image_base64
+                }
+            }
+        ]
+    })
+
+    try:
+        completion = client.chat.completions.create(
+            model="qwen/qwen3.6-27b",
+            messages=messages,
+        )
+        reply = completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Vision API failed: {str(e)}")
 
     supabase = get_supabase_client()
     if supabase:

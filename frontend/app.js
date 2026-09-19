@@ -1265,6 +1265,9 @@ function initChatForm() {
   if (attachBtn && fileInput) {
     attachBtn.addEventListener("click", () => fileInput.click());
     
+    var imgPreview = document.getElementById("chat-attachment-img");
+    var iconPreview = document.getElementById("chat-attachment-icon");
+
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1278,12 +1281,31 @@ function initChatForm() {
       currentChatAttachment = file;
       previewName.textContent = file.name;
       previewContainer.style.display = "flex";
+
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imgPreview.src = e.target.result;
+          imgPreview.style.display = "block";
+          iconPreview.style.display = "none";
+          // Store base64 data directly on the object for later API use
+          currentChatAttachment.base64Data = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imgPreview.style.display = "none";
+        imgPreview.src = "";
+        iconPreview.style.display = "block";
+      }
     });
     
     previewRemove.addEventListener("click", () => {
       currentChatAttachment = null;
       fileInput.value = "";
       previewContainer.style.display = "none";
+      imgPreview.style.display = "none";
+      imgPreview.src = "";
+      iconPreview.style.display = "block";
     });
   }
   var thread = document.getElementById("chat-thread");
@@ -1328,47 +1350,56 @@ function initChatForm() {
     
     let combinedQuestion = question;
     let fileToUpload = currentChatAttachment;
+    let isImage = fileToUpload && fileToUpload.type.startsWith("image/");
+    let imageBase64 = fileToUpload ? fileToUpload.base64Data : null;
     
     if (fileToUpload) {
       // Clear attachment immediately from UI
       currentChatAttachment = null;
       if (fileInput) fileInput.value = "";
-      if (previewContainer) previewContainer.style.display = "none";
+      if (previewContainer) {
+        previewContainer.style.display = "none";
+        document.getElementById("chat-attachment-img").style.display = "none";
+        document.getElementById("chat-attachment-icon").style.display = "block";
+      }
       
       appendChatBubble("user", "Attached: " + fileToUpload.name + (question ? "\n\n" + question : ""));
       appendTypingIndicator();
-      setStatus("Extracting text…", true);
       
-      try {
-        var token = await getAuthToken();
-        const formData = new FormData();
-        formData.append("file", fileToUpload);
+      if (!isImage) {
+        setStatus("Extracting text…", true);
         
-        var extractHeaders = {};
-        if (token) extractHeaders["Authorization"] = "Bearer " + token;
-        
-        const extractRes = await fetch(API_BASE + "/api/extract_text", {
-          method: "POST",
-          headers: extractHeaders,
-          body: formData
-        });
-        
-        if (!extractRes.ok) {
-          const errData = await extractRes.json().catch(()=>({}));
-          throw new Error(errData.detail || "Extraction failed");
+        try {
+          var token = await getAuthToken();
+          const formData = new FormData();
+          formData.append("file", fileToUpload);
+          
+          var extractHeaders = {};
+          if (token) extractHeaders["Authorization"] = "Bearer " + token;
+          
+          const extractRes = await fetch(API_BASE + "/api/extract_text", {
+            method: "POST",
+            headers: extractHeaders,
+            body: formData
+          });
+          
+          if (!extractRes.ok) {
+            const errData = await extractRes.json().catch(()=>({}));
+            throw new Error(errData.detail || "Extraction failed");
+          }
+          
+          const extractData = await extractRes.json();
+          const extractedText = extractData.extracted_text;
+          
+          combinedQuestion = `The user uploaded a file named ${fileToUpload.name}. Its content:\n\n${extractedText}\n\nUser's message: ${question}`;
+          
+        } catch (err) {
+          console.error(err);
+          removeTypingIndicator();
+          appendChatBubble("system", "Attachment error: " + err.message);
+          setStatus("Error while extracting");
+          return; // Halt chat flow on extraction error
         }
-        
-        const extractData = await extractRes.json();
-        const extractedText = extractData.extracted_text;
-        
-        combinedQuestion = `The user uploaded a file named ${fileToUpload.name}. Its content:\n\n${extractedText}\n\nUser's message: ${question}`;
-        
-      } catch (err) {
-        console.error(err);
-        removeTypingIndicator();
-        appendChatBubble("system", "Attachment error: " + err.message);
-        setStatus("Error while extracting");
-        return; // Halt chat flow on extraction error
       }
     } else {
       appendChatBubble("user", question);
@@ -1378,23 +1409,41 @@ function initChatForm() {
     setStatus("Thinking…", true);
     
     // Store original question in history for user readability if no file, 
-    // or store the combined context if there was a file.
-    // To keep UI clean, we just record the system augmented prompt as the user prompt.
-    chatHistory.push({ role: "user", content: combinedQuestion });
+    // or store the combined context if there was a text file.
+    if (!isImage) {
+      chatHistory.push({ role: "user", content: combinedQuestion });
+    } else {
+      // For images, we append it to history as well. 
+      // Note: If you want future context to include the image, you'd need the API to support history of images.
+      // But usually just pushing the text into history is safer to avoid ballooning history context size.
+      chatHistory.push({ role: "user", content: `[User uploaded image: ${fileToUpload.name}]\n${question}` });
+    }
     
     try {
       var token = await getAuthToken();
       var headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = "Bearer " + token;
-      var res = await fetch(API_BASE + "/api/chat", {
+      
+      var endpoint = isImage ? "/api/chat_vision" : "/api/chat";
+      var payload = {
+        code_context: editor.getValue(),
+        language:     currentLanguage,
+        messages:     chatHistory,
+      };
+      
+      if (isImage) {
+        payload.image_base64 = imageBase64;
+        payload.image_question = question || "Please describe this image.";
+      }
+
+      var res = await fetch(API_BASE + endpoint, {
         method: "POST", headers: headers,
-        body: JSON.stringify({
-          code_context: editor.getValue(),
-          language:     currentLanguage,
-          messages:     chatHistory,
-        }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      if (!res.ok) {
+        const errData = await res.json().catch(()=>({}));
+        throw new Error(errData.detail || "HTTP " + res.status);
+      }
       var data = await res.json();
       removeTypingIndicator();
       appendChatBubble("system", data.reply);
