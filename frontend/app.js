@@ -18,6 +18,7 @@ let authReady       = false;
 let tabs = [];
 let activeTabId = null;
 let tabCounter = 0;
+let isSwitchingTab = false;
 
 Object.defineProperty(window, 'currentLanguage', {
   get: () => { const t = tabs.find(t => t.id === activeTabId); return t ? t.language : 'python'; },
@@ -86,9 +87,6 @@ function switchTab(id) {
   if (activeTabId && window.editor) {
     const oldTab = tabs.find(t => t.id === activeTabId);
     if (oldTab) {
-      oldTab.code = window.editor.getValue();
-      const goalSel = document.getElementById('goal-select');
-      if (goalSel) oldTab.objective = goalSel.value;
       const summaryEl = document.getElementById('insights-summary');
       const listEl = document.getElementById('insights-list');
       const complexityEl = document.getElementById('insights-complexity');
@@ -107,51 +105,53 @@ function switchTab(id) {
   renderTabs();
   
   if (window.editor) {
-    const wrap = document.querySelector('.monaco-editor-wrap');
-    if (wrap) wrap.classList.add('fade-out');
+    isSwitchingTab = true;
     
-    setTimeout(() => {
-      window.editor.setValue(newTab.code);
-      window.monaco.editor.setModelLanguage(window.editor.getModel(), languageToMonaco(newTab.language));
-      
-      const langSel = document.getElementById('language-select');
-      if (langSel) langSel.value = newTab.language;
-      const objSel = document.getElementById('goal-select');
-      if (objSel) objSel.value = newTab.objective;
-      
-      const summaryEl = document.getElementById('insights-summary');
-      const listEl = document.getElementById('insights-list');
-      const complexityEl = document.getElementById('insights-complexity');
-      const threadEl = document.getElementById('chat-thread');
-      const emptyInsightsEl = document.querySelector('.insights-empty');
-      const filtersEl = document.getElementById('insights-filters');
-      
-      if (summaryEl) {
-        summaryEl.innerHTML = newTab.insightsHtml.summary || "";
-        summaryEl.style.display = newTab.insightsHtml.summary ? "block" : "none";
-      }
-      if (listEl) {
-        listEl.innerHTML = newTab.insightsHtml.list || "";
-      }
-      if (complexityEl) {
-        complexityEl.innerHTML = newTab.insightsHtml.complexity || "";
-      }
-      if (threadEl) {
-        threadEl.innerHTML = newTab.chatHtml || "";
-      }
-      
-      const hasInsights = newTab.insightsHtml.summary || newTab.insightsHtml.list;
-      if (emptyInsightsEl) emptyInsightsEl.style.display = hasInsights ? "none" : "flex";
-      if (filtersEl) filtersEl.style.display = hasInsights ? "flex" : "none";
-      
-      if (wrap) {
-        wrap.classList.remove('fade-out');
-        wrap.classList.add('fade-in');
-        setTimeout(() => wrap.classList.remove('fade-in'), 200);
-      }
-      updateMetrics();
-      switchAIPanel(newTab.activePanel || "assistant");
-    }, 150);
+    // Apply changes synchronously to prevent race conditions during rapid switching
+    window.editor.setValue(newTab.code);
+    window.monaco.editor.setModelLanguage(window.editor.getModel(), languageToMonaco(newTab.language));
+    
+    const langSel = document.getElementById('language-select');
+    if (langSel) langSel.value = newTab.language;
+    const objSel = document.getElementById('goal-select');
+    if (objSel) objSel.value = newTab.objective;
+    
+    const summaryEl = document.getElementById('insights-summary');
+    const listEl = document.getElementById('insights-list');
+    const complexityEl = document.getElementById('insights-complexity');
+    const threadEl = document.getElementById('chat-thread');
+    const emptyInsightsEl = document.querySelector('.insights-empty');
+    const filtersEl = document.getElementById('insights-filters');
+    
+    if (summaryEl) {
+      summaryEl.innerHTML = newTab.insightsHtml.summary || "";
+      summaryEl.style.display = newTab.insightsHtml.summary ? "block" : "none";
+    }
+    if (listEl) {
+      listEl.innerHTML = newTab.insightsHtml.list || "";
+    }
+    if (complexityEl) {
+      complexityEl.innerHTML = newTab.insightsHtml.complexity || "";
+    }
+    if (threadEl) {
+      threadEl.innerHTML = newTab.chatHtml || "";
+    }
+    
+    const hasInsights = newTab.insightsHtml.summary || newTab.insightsHtml.list;
+    if (emptyInsightsEl) emptyInsightsEl.style.display = hasInsights ? "none" : "flex";
+    if (filtersEl) filtersEl.style.display = hasInsights ? "flex" : "none";
+    
+    updateMetrics();
+    switchAIPanel(newTab.activePanel || "assistant");
+    
+    isSwitchingTab = false;
+    
+    const wrap = document.querySelector('.monaco-editor-wrap');
+    if (wrap) {
+      wrap.classList.remove('fade-out');
+      wrap.classList.add('fade-in');
+      setTimeout(() => wrap.classList.remove('fade-in'), 200);
+    }
   }
 }
 
@@ -366,7 +366,13 @@ function initEditor() {
     tabSize:             tabSize,
     scrollbar: { useShadows: false, verticalScrollbarSize: 5, horizontalScrollbarSize: 5 },
   });
-  editor.onDidChangeModelContent(updateMetrics);
+  editor.onDidChangeModelContent(function() {
+    updateMetrics();
+    if (!isSwitchingTab) {
+      const t = tabs.find(tab => tab.id === activeTabId);
+      if (t) t.code = editor.getValue();
+    }
+  });
   updateMetrics();
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
     document.getElementById("btn-save") && document.getElementById("btn-save").click();
