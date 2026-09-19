@@ -1663,6 +1663,7 @@ function startApp() {
   initDiffButton();
   initSaveLoadButtons();
   initGlobalKeyboardShortcuts();
+  initResizer();
   
   createTab(); // Initialize the first tab
   
@@ -1689,6 +1690,84 @@ function startApp() {
 
   if (getNotifications().length === 0) {
     addNotification("Welcome to Coderefine Studio! Paste code and hit Refine with AI.", "info");
+  }
+}
+
+/* ── RESIZE PANEL LOGIC ─────────────────────────────────────── */
+function initResizer() {
+  const handle = document.getElementById('ai-panel-resize-handle');
+  const appBody = document.querySelector('.app-body');
+  const collapseBtn = document.getElementById('ai-panel-collapse-btn');
+  const collapseIcon = document.getElementById('collapse-icon');
+  
+  if (!handle || !appBody) return;
+
+  let isResizing = false;
+  let isCollapsed = false;
+  let lastWidth = localStorage.getItem('coderefine:panelWidth') || 360;
+  
+  appBody.style.gridTemplateColumns = `1fr auto ${lastWidth}px`;
+
+  handle.addEventListener('mousedown', (e) => {
+    if (e.target.closest('#ai-panel-collapse-btn')) return;
+    if (isCollapsed) return;
+    
+    isResizing = true;
+    handle.classList.add('active');
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    let newWidth = window.innerWidth - e.clientX;
+    const minWidth = 280;
+    const maxWidth = window.innerWidth * 0.6;
+    
+    if (newWidth < minWidth) newWidth = minWidth;
+    if (newWidth > maxWidth) newWidth = maxWidth;
+    
+    appBody.style.gridTemplateColumns = `1fr auto ${newWidth}px`;
+    lastWidth = newWidth;
+    
+    if (editor && typeof editor.layout === 'function') {
+      editor.layout();
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      localStorage.setItem('coderefine:panelWidth', lastWidth);
+    }
+  });
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      isCollapsed = !isCollapsed;
+      
+      appBody.style.transition = 'grid-template-columns 0.3s cubic-bezier(0.16,1,0.3,1)';
+      
+      if (isCollapsed) {
+        appBody.style.gridTemplateColumns = `1fr auto 0px`;
+        collapseIcon.innerHTML = `<polyline points="15 18 9 12 15 6"></polyline>`;
+      } else {
+        appBody.style.gridTemplateColumns = `1fr auto ${lastWidth}px`;
+        collapseIcon.innerHTML = `<polyline points="9 18 15 12 9 6"></polyline>`;
+      }
+      
+      let start = performance.now();
+      function tick(time) {
+        if (editor) editor.layout();
+        if (time - start < 300) requestAnimationFrame(tick);
+        else appBody.style.transition = '';
+      }
+      requestAnimationFrame(tick);
+    });
   }
 }
 
