@@ -1003,37 +1003,49 @@ function openDiffViewer() {
     showToast("Run a refinement first to compare before/after", "warning");
     return;
   }
-  var modal = createModal("Diff Viewer — Before vs After",
-    '<div style="display:flex;flex-direction:column;gap:8px;">'
-    + '<div style="display:flex;gap:12px;font-size:0.72rem;color:var(--fg-muted);">'
-    + '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(244,63,94,0.4);margin-right:4px;"></span>Before (original)</span>'
-    + '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(16,185,129,0.4);margin-right:4px;"></span>After (refined)</span>'
-    + '</div>'
-    + '<div id="diff-editor-container" style="height:380px;border:1px solid var(--border);border-radius:8px;overflow:hidden;"></div>'
-    + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
-    + '<button class="btn" onclick="window.copyDiffAfter()" style="font-size:0.78rem;">Copy Refined</button>'
-    + '<button class="btn btn-primary" onclick="window.closeModal()" style="font-size:0.78rem;">Close</button>'
-    + '</div></div>'
-  );
-  document.body.appendChild(modal);
-  requestAnimationFrame(function() {
-    var container = document.getElementById("diff-editor-container");
-    if (!container || !window.monaco) return;
-    if (diffEditor) { diffEditor.dispose(); diffEditor = null; }
-    diffEditor = monaco.editor.createDiffEditor(container, {
+  
+  // Set active tab visually
+  document.querySelectorAll(".ai-tabs .ai-tab").forEach(t => t.classList.remove("active"));
+  var btnDiff = document.getElementById("btn-diff");
+  if (btnDiff) btnDiff.classList.add("active");
+  
+  var editorContainer = document.getElementById("editor-container");
+  if (editorContainer) editorContainer.style.display = "none";
+  
+  var diffContainer = document.getElementById("inline-diff-container");
+  if (!diffContainer) {
+    diffContainer = document.createElement("div");
+    diffContainer.id = "inline-diff-container";
+    diffContainer.className = "monaco-editor-wrap";
+    diffContainer.style.height = "100%";
+    diffContainer.style.width = "100%";
+    if (editorContainer) {
+      editorContainer.parentNode.appendChild(diffContainer);
+    }
+    
+    var savedFontSize = parseInt(localStorage.getItem("coderefine:fontSize") || "13", 10);
+    diffEditor = monaco.editor.createDiffEditor(diffContainer, {
       automaticLayout: true,
       theme:           localStorage.getItem("coderefine:theme") === "light" ? "vs" : "vs-dark",
       readOnly:        true,
       minimap:         { enabled: false },
-      fontFamily:      "'Geist Mono', monospace",
-      fontSize:        12,
-      lineHeight:      20,
+      fontFamily:      "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace",
+      fontSize:        savedFontSize,
+      lineHeight:      22,
       renderSideBySide: true,
+      scrollbar: { useShadows: false, verticalScrollbarSize: 5, horizontalScrollbarSize: 5 },
     });
-    diffEditor.setModel({
-      original: monaco.editor.createModel(originalCode,       languageToMonaco(currentLanguage)),
-      modified: monaco.editor.createModel(editor.getValue(),  languageToMonaco(currentLanguage)),
-    });
+  }
+  
+  diffContainer.style.display = "block";
+  
+  var oldModel = diffEditor.getModel();
+  if (oldModel && oldModel.original) oldModel.original.dispose();
+  if (oldModel && oldModel.modified) oldModel.modified.dispose();
+  
+  diffEditor.setModel({
+    original: monaco.editor.createModel(originalCode,       languageToMonaco(currentLanguage)),
+    modified: monaco.editor.createModel(editor.getValue(),  languageToMonaco(currentLanguage)),
   });
 }
 window.copyDiffAfter = function() {
@@ -1123,9 +1135,24 @@ function switchAIPanel(panelName) {
   insightsPanel.classList.toggle("ai-body-hidden",   isAssistant);
   document.querySelectorAll(".ai-tabs .ai-tab, .side-panel-tabs .tab").forEach(function(t) {
     var tp = t.getAttribute("data-panel");
-    t.classList.toggle("active",     tp === panelName);
-    t.classList.toggle("tab-active", tp === panelName);
+    if (tp) {
+      t.classList.toggle("active",     tp === panelName);
+      t.classList.toggle("tab-active", tp === panelName);
+    }
   });
+  
+  // Ensure diff tab loses active state
+  var btnDiff = document.getElementById("btn-diff");
+  if (btnDiff && panelName !== "diff") {
+    btnDiff.classList.remove("active");
+  }
+
+  // Restore normal editor container
+  var editorContainer = document.getElementById("editor-container");
+  var diffContainer = document.getElementById("inline-diff-container");
+  if (editorContainer) editorContainer.style.display = "block";
+  if (diffContainer) diffContainer.style.display = "none";
+  
   const tab = tabs.find(t => t.id === activeTabId);
   if (tab) tab.activePanel = panelName;
 }
