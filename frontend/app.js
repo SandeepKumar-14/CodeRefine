@@ -444,20 +444,26 @@ function initEditor() {
     
     clearTimeout(aiWidget.hideTimeout);
     aiWidget.hideTimeout = setTimeout(() => {
-      const selection = editor.getSelection();
-      if (selection.isEmpty()) return;
-      
-      const position = editor.getScrolledVisiblePosition(editor.getPosition());
-      if (position) {
-        const editorDOM = editor.getContainerDOMNode();
-        const rect = editorDOM.getBoundingClientRect();
+      try {
+        const selection = editor.getSelection();
+        if (selection.isEmpty()) return;
         
-        const top = rect.top + position.top - 40;
-        const left = rect.left + position.left;
-        
-        aiWidget.style.top = `${Math.max(10, top)}px`;
-        aiWidget.style.left = `${Math.max(rect.left + 10, left)}px`;
-        aiWidget.classList.add("visible");
+        const position = editor.getScrolledVisiblePosition(editor.getPosition());
+        if (position) {
+          const editorDOM = container || (editor.getContainerDomNode ? editor.getContainerDomNode() : editor.getDomNode());
+          if (!editorDOM) return;
+
+          const rect = editorDOM.getBoundingClientRect();
+          
+          const top = rect.top + position.top - 40;
+          const left = rect.left + position.left;
+          
+          aiWidget.style.top = `${Math.max(10, top)}px`;
+          aiWidget.style.left = `${Math.max(rect.left + 10, left)}px`;
+          aiWidget.classList.add("visible");
+        }
+      } catch (err) {
+        console.warn("Could not position AI selection widget:", err);
       }
     }, 150);
   });
