@@ -418,7 +418,7 @@ function initEditor() {
       const endLine = selection.endLineNumber;
       const linesText = (startLine === endLine) ? `Line ${startLine}` : `Lines ${startLine}–${endLine}`;
       
-      const promptStub = `Explain this code:\n\n*${linesText}:*\n\`\`\`${currentLanguage}\n${text}\n\`\`\`\n\n`;
+      const promptStub = `Explain ONLY this specific code snippet (do not comment on the rest of the file):\n\n*${linesText}:*\n\`\`\`${currentLanguage}\n${text}\n\`\`\`\n\n`;
       
       const chatInput = document.getElementById("chat-input");
       if (chatInput) {
