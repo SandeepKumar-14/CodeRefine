@@ -1682,14 +1682,13 @@ function initRunButton() {
       
       const data = await res.json();
       
-      if (data.stderr) {
-        runOutput.textContent = data.stderr;
-        runOutput.classList.add("error");
-        if (tab) tab.runOutputError = true;
-      } else {
-        runOutput.textContent = data.stdout || "(No output)";
+      runOutput.textContent = data.output || "(No output)";
+      if (data.statusCode === 200) {
         runOutput.classList.remove("error");
         if (tab) tab.runOutputError = false;
+      } else {
+        runOutput.classList.add("error");
+        if (tab) tab.runOutputError = true;
       }
       
       if (tab) tab.runOutput = runOutput.textContent;

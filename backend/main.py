@@ -81,9 +81,10 @@ class ExecuteRequest(BaseModel):
 
 
 class ExecuteResponse(BaseModel):
-    stdout: str
-    stderr: str
-    exit_code: int
+    output: str
+    statusCode: int
+    memory: Optional[str] = None
+    cpuTime: Optional[str] = None
 
 
 def get_groq_client() -> Groq:
@@ -505,11 +506,14 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
             data = resp.json()
             
             if "error" in data:
-                return ExecuteResponse(stdout="", stderr=data["error"], exit_code=1)
+                return ExecuteResponse(output=data["error"], statusCode=400)
                 
-            stdout = data.get("output", "")
-            
-            return ExecuteResponse(stdout=stdout, stderr="", exit_code=0)
+            return ExecuteResponse(
+                output=data.get("output", ""),
+                statusCode=data.get("statusCode", 200),
+                memory=data.get("memory"),
+                cpuTime=data.get("cpuTime")
+            )
             
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Execution timed out after 15 seconds.")
