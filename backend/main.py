@@ -215,7 +215,16 @@ def refine_code(payload: RefineRequest, user = Depends(get_current_user)) -> Ref
         ],
     )
 
-    refined_code = chat_completion.choices[0].message.content
+    raw_content = chat_completion.choices[0].message.content.strip()
+    if raw_content.startswith("```"):
+        lines = raw_content.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        refined_code = "\n".join(lines).strip()
+    else:
+        refined_code = raw_content
 
     explanation_completion = client.chat.completions.create(
         model="openai/gpt-oss-120b",
