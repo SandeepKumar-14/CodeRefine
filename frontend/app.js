@@ -8,14 +8,200 @@ const SUPABASE_URL      = FRONTEND_CONFIG.SUPABASE_URL      || "";
 const SUPABASE_ANON_KEY = FRONTEND_CONFIG.SUPABASE_ANON_KEY || "";
 
 let editor          = null;
-let currentLanguage = "python";
 let monacoReady     = false;
 let domReady        = false;
 let appStarted      = false;
 let supabaseClient  = null;
 let authReady       = false;
-let originalCode    = "";   // Stores pre-refinement code for diff
-let chatHistory     = [];   // Full conversation for multi-turn chat
+
+/* ── TAB STATE MANAGEMENT ───────────────────────────────────── */
+let tabs = [];
+let activeTabId = null;
+let tabCounter = 0;
+
+Object.defineProperty(window, 'currentLanguage', {
+  get: () => { const t = tabs.find(t => t.id === activeTabId); return t ? t.language : 'python'; },
+  set: (val) => { const t = tabs.find(t => t.id === activeTabId); if (t) t.language = val; }
+});
+Object.defineProperty(window, 'originalCode', {
+  get: () => { const t = tabs.find(t => t.id === activeTabId); return t ? t.originalCode : ''; },
+  set: (val) => { const t = tabs.find(t => t.id === activeTabId); if (t) t.originalCode = val; }
+});
+Object.defineProperty(window, 'chatHistory', {
+  get: () => { const t = tabs.find(t => t.id === activeTabId); return t ? t.chatHistory : []; },
+  set: (val) => { const t = tabs.find(t => t.id === activeTabId); if (t) t.chatHistory = val; }
+});
+
+/* ── TAB FUNCTIONS ──────────────────────────────────────────── */
+function createTab(filename = null, language = "python") {
+  if (tabs.length >= 10) {
+    showToast("Tab limit reached (10 tabs). Please close some tabs first.", "warning");
+    return;
+  }
+  tabCounter++;
+  const id = "tab-" + tabCounter;
+  const newTab = {
+    id: id,
+    filename: filename || ("scratch" + (tabCounter > 1 ? tabCounter : "") + "." + (LANG_EXT[language] || language)),
+    language: language,
+    objective: "General Polish",
+    code: "# Paste or type code here to refine it.\n\n",
+    originalCode: "",
+    refinedCode: "",
+    chatHistory: [],
+    insightsHtml: { summary: "", list: "", complexity: "" },
+    chatHtml: "",
+    activePanel: "assistant"
+  };
+  tabs.push(newTab);
+  renderTabs();
+  switchTab(id);
+}
+
+function closeTab(id, event) {
+  if (event) event.stopPropagation();
+  const tabIndex = tabs.findIndex(t => t.id === id);
+  if (tabIndex === -1) return;
+  const tab = tabs[tabIndex];
+  
+  if (tab.code !== "# Paste or type code here to refine it.\n\n" && tab.code.trim() !== "") {
+    if (!confirm(`Close ${tab.filename}? Unsaved changes will be lost.`)) return;
+  }
+  
+  tabs.splice(tabIndex, 1);
+  if (tabs.length === 0) {
+    createTab(); // Keep at least one tab open
+  } else if (activeTabId === id) {
+    const nextTab = tabs[tabIndex] || tabs[tabIndex - 1];
+    switchTab(nextTab.id);
+  } else {
+    renderTabs();
+  }
+}
+
+function switchTab(id) {
+  const newTab = tabs.find(t => t.id === id);
+  if (!newTab) return;
+  
+  if (activeTabId && window.editor) {
+    const oldTab = tabs.find(t => t.id === activeTabId);
+    if (oldTab) {
+      oldTab.code = window.editor.getValue();
+      const goalSel = document.getElementById('goal-select');
+      if (goalSel) oldTab.objective = goalSel.value;
+      const summaryEl = document.getElementById('insights-summary');
+      const listEl = document.getElementById('insights-list');
+      const complexityEl = document.getElementById('insights-complexity');
+      const threadEl = document.getElementById('chat-thread');
+      
+      oldTab.insightsHtml = {
+        summary: summaryEl ? summaryEl.innerHTML : "",
+        list: listEl ? listEl.innerHTML : "",
+        complexity: complexityEl ? complexityEl.innerHTML : ""
+      };
+      oldTab.chatHtml = threadEl ? threadEl.innerHTML : "";
+    }
+  }
+  
+  activeTabId = id;
+  renderTabs();
+  
+  if (window.editor) {
+    const wrap = document.querySelector('.monaco-editor-wrap');
+    if (wrap) wrap.classList.add('fade-out');
+    
+    setTimeout(() => {
+      window.editor.setValue(newTab.code);
+      window.monaco.editor.setModelLanguage(window.editor.getModel(), languageToMonaco(newTab.language));
+      
+      const langSel = document.getElementById('language-select');
+      if (langSel) langSel.value = newTab.language;
+      const objSel = document.getElementById('goal-select');
+      if (objSel) objSel.value = newTab.objective;
+      
+      const summaryEl = document.getElementById('insights-summary');
+      const listEl = document.getElementById('insights-list');
+      const complexityEl = document.getElementById('insights-complexity');
+      const threadEl = document.getElementById('chat-thread');
+      const emptyInsightsEl = document.querySelector('.insights-empty');
+      const filtersEl = document.getElementById('insights-filters');
+      
+      if (summaryEl) {
+        summaryEl.innerHTML = newTab.insightsHtml.summary || "";
+        summaryEl.style.display = newTab.insightsHtml.summary ? "block" : "none";
+      }
+      if (listEl) {
+        listEl.innerHTML = newTab.insightsHtml.list || "";
+      }
+      if (complexityEl) {
+        complexityEl.innerHTML = newTab.insightsHtml.complexity || "";
+      }
+      if (threadEl) {
+        threadEl.innerHTML = newTab.chatHtml || "";
+      }
+      
+      const hasInsights = newTab.insightsHtml.summary || newTab.insightsHtml.list;
+      if (emptyInsightsEl) emptyInsightsEl.style.display = hasInsights ? "none" : "flex";
+      if (filtersEl) filtersEl.style.display = hasInsights ? "flex" : "none";
+      
+      if (wrap) {
+        wrap.classList.remove('fade-out');
+        wrap.classList.add('fade-in');
+        setTimeout(() => wrap.classList.remove('fade-in'), 200);
+      }
+      updateMetrics();
+      switchAIPanel(newTab.activePanel || "assistant");
+    }, 150);
+  }
+}
+
+function renderTabs() {
+  const container = document.getElementById('tabs-container');
+  if (!container) return;
+  container.innerHTML = "";
+  
+  tabs.forEach(tab => {
+    const el = document.createElement('div');
+    el.className = 'file-tab' + (tab.id === activeTabId ? ' active' : '');
+    el.onclick = () => switchTab(tab.id);
+    
+    const svg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                   <polyline points="14 2 14 8 20 8" />
+                 </svg>`;
+                 
+    const span = document.createElement('span');
+    span.textContent = tab.filename;
+    span.ondblclick = (e) => {
+      e.stopPropagation();
+      span.contentEditable = "true";
+      span.focus();
+      document.execCommand('selectAll', false, null);
+    };
+    span.onblur = () => {
+      span.contentEditable = "false";
+      tab.filename = span.textContent.trim() || "untitled";
+      span.textContent = tab.filename;
+    };
+    span.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        span.blur();
+      }
+    };
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-tab-btn';
+    closeBtn.title = "Close tab";
+    closeBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    closeBtn.onclick = (e) => closeTab(tab.id, e);
+    
+    el.innerHTML = svg;
+    el.appendChild(span);
+    el.appendChild(closeBtn);
+    container.appendChild(el);
+  });
+}
 
 /* ── LANGUAGE HELPERS ──────────────────────────────────────── */
 const LANG_EXT = {
@@ -28,8 +214,14 @@ const LANG_MONACO = {
 };
 
 function updateFileNameBadge() {
-  const badge = document.getElementById("file-name-badge");
-  if (badge) badge.textContent = `scratch.${LANG_EXT[currentLanguage] || currentLanguage}`;
+  const t = tabs.find(t => t.id === activeTabId);
+  if (t) {
+    const ext = LANG_EXT[currentLanguage] || currentLanguage;
+    if (t.filename.startsWith("scratch")) {
+      t.filename = "scratch" + (t.id.replace("tab-", "") > 1 ? t.id.replace("tab-", "") : "") + "." + ext;
+      renderTabs();
+    }
+  }
 }
 function languageToMonaco(lang) { return LANG_MONACO[lang] || "plaintext"; }
 
@@ -811,6 +1003,8 @@ function switchAIPanel(panelName) {
     t.classList.toggle("active",     tp === panelName);
     t.classList.toggle("tab-active", tp === panelName);
   });
+  const tab = tabs.find(t => t.id === activeTabId);
+  if (tab) tab.activePanel = panelName;
 }
 
 function initSidePanelTabs() {
@@ -927,6 +1121,7 @@ function initRefineButton() {
     setStatus("Refining with Groq…", true);
     button.classList.add("loading");
     button.disabled = true;
+    document.querySelectorAll('.file-tab, .add-tab-btn').forEach(t => t.style.pointerEvents = 'none');
     try {
       var token   = await getAuthToken();
       var headers = { "Content-Type": "application/json" };
@@ -969,6 +1164,7 @@ function initRefineButton() {
     } finally {
       button.classList.remove("loading");
       button.disabled = false;
+      document.querySelectorAll('.file-tab, .add-tab-btn').forEach(t => t.style.pointerEvents = 'auto');
     }
   });
 }
@@ -1386,12 +1582,7 @@ function initSidebar() {
   // Wire all sidebar buttons
   var sbNew = document.getElementById("sb-new-file");
   if (sbNew) sbNew.addEventListener("click", function() {
-    if (!editor) return;
-    if (editor.getValue().trim() && !confirm("Discard current code and start a new file?")) return;
-    editor.setValue("# New file\n\n");
-    chatHistory = []; originalCode = "";
-    updateMetrics();
-    showToast("New file created", "info");
+    createTab();
   });
 
   var sbDiff = document.getElementById("sb-diff");
@@ -1466,7 +1657,25 @@ function startApp() {
   initDiffButton();
   initSaveLoadButtons();
   initGlobalKeyboardShortcuts();
-  updateFileNameBadge();
+  
+  createTab(); // Initialize the first tab
+  
+  const addTabBtn = document.getElementById('add-tab-btn');
+  if (addTabBtn) {
+    addTabBtn.onclick = () => {
+      const langSel = document.getElementById('language-select');
+      createTab(null, langSel ? langSel.value : 'python');
+    };
+  }
+  
+  const goalSel = document.getElementById("goal-select");
+  if (goalSel) {
+    goalSel.addEventListener("change", function() {
+      const t = tabs.find(t => t.id === activeTabId);
+      if (t) t.objective = this.value;
+    });
+  }
+  
   updateHistoryBadge();
   updateNotifBadge();
   pingBackend();
