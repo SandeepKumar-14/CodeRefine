@@ -317,11 +317,33 @@
             </div>
             <div class="run-panel-body">
               <div class="run-input-section">
-                <label>Input (stdin)</label>
+                <div class="run-section-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                  </svg>
+                  <label>Input (stdin)</label>
+                  <div id="run-input-warning" class="run-input-warning" style="display: none;">
+                    This code appears to need input — fill in Input (stdin) first to avoid a wasted run.
+                  </div>
+                </div>
                 <textarea id="run-input" placeholder="Enter standard input here..."></textarea>
               </div>
               <div class="run-output-section">
-                <label>Output</label>
+                <div class="run-section-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <label>Output</label>
+                  <button id="btn-copy-output" class="btn-icon-small" title="Copy Output" style="margin-left: auto;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </button>
+                </div>
                 <pre id="run-output" class="run-output"></pre>
               </div>
             </div>

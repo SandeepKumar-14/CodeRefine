@@ -53,6 +53,7 @@ function createTab(filename = null, language = "python") {
     runOutput: "",
     isRunPanelOpen: false,
     runOutputError: false,
+    inputWarningShown: false,
     chatHistory: [],
     insightsHtml: { summary: "", list: "", complexity: "" },
     chatHtml: "",
@@ -168,12 +169,16 @@ function switchTab(id) {
     const runPanel = document.getElementById("run-panel");
     const runInput = document.getElementById("run-input");
     const runOutput = document.getElementById("run-output");
+    const runInputWarning = document.getElementById("run-input-warning");
     
     if (runInput) runInput.value = newTab.runInput || "";
     if (runOutput) {
       runOutput.textContent = newTab.runOutput || "";
       if (newTab.runOutputError) runOutput.classList.add("error");
       else runOutput.classList.remove("error");
+    }
+    if (runInputWarning) {
+      runInputWarning.style.display = newTab.inputWarningShown ? "block" : "none";
     }
     
     if (runPanel) {
@@ -1631,6 +1636,8 @@ function initRunButton() {
   const runInput = document.getElementById("run-input");
   const runOutput = document.getElementById("run-output");
   const btnCloseRun = document.getElementById("btn-close-run");
+  const runInputWarning = document.getElementById("run-input-warning");
+  const btnCopyOutput = document.getElementById("btn-copy-output");
   
   if (btnCloseRun) {
     btnCloseRun.addEventListener("click", () => {
@@ -1638,6 +1645,43 @@ function initRunButton() {
       const tab = tabs.find(t => t.id === activeTabId);
       if (tab) tab.isRunPanelOpen = false;
     });
+  }
+  
+  if (btnCopyOutput) {
+    btnCopyOutput.addEventListener("click", () => {
+      const outText = runOutput.textContent;
+      if (!outText) return;
+      navigator.clipboard.writeText(outText);
+      const svg = btnCopyOutput.querySelector("svg");
+      const originalHtml = svg.innerHTML;
+      svg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+      svg.style.color = "var(--success)";
+      setTimeout(() => {
+        svg.innerHTML = originalHtml;
+        svg.style.color = "";
+      }, 1500);
+    });
+  }
+  
+  if (runInput) {
+    runInput.addEventListener("input", () => {
+      if (runInput.value.trim() !== "" && runInputWarning) {
+        runInputWarning.style.display = "none";
+        const tab = tabs.find(t => t.id === activeTabId);
+        if (tab) tab.inputWarningShown = false;
+      }
+    });
+  }
+  
+  function checkInputRequirement(code, language) {
+    if (!code) return false;
+    const lang = language.toLowerCase();
+    if (lang === "java") return /Scanner|\.nextInt\(|\.nextLine\(|\.next\(|System\.in/.test(code);
+    if (lang === "python") return /input\(/.test(code);
+    if (lang === "c" || lang === "cpp") return /cin\s*>>|scanf\(|gets\(|fgets\(/.test(code);
+    if (lang === "javascript") return /prompt\(|readline/.test(code);
+    if (lang === "rust") return /io::stdin/.test(code);
+    return false;
   }
 
   async function executeCode() {
@@ -1650,8 +1694,23 @@ function initRunButton() {
     }
     
     const tab = tabs.find(t => t.id === activeTabId);
-    if (tab) tab.isRunPanelOpen = true;
+    if (!tab) return;
     
+    const needsInput = checkInputRequirement(code, currentLanguage);
+    if (needsInput && (!runInput || runInput.value.trim() === "")) {
+      if (!tab.inputWarningShown) {
+        if (runInputWarning) runInputWarning.style.display = "block";
+        if (runPanel.style.display === "none") runPanel.style.display = "flex";
+        tab.isRunPanelOpen = true;
+        tab.inputWarningShown = true;
+        return; // soft block for first time
+      }
+    } else {
+      if (runInputWarning) runInputWarning.style.display = "none";
+      tab.inputWarningShown = false;
+    }
+    
+    tab.isRunPanelOpen = true;
     if (runPanel.style.display === "none") {
       runPanel.style.display = "flex";
     }
