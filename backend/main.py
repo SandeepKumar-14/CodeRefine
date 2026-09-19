@@ -159,18 +159,22 @@ def get_goal_specific_prompt(goal: str) -> tuple:
     elif "bug" in goal_lower or "fix" in goal_lower:
         system = (
             "You are Coderefine, an expert code auditor and debugger. "
-            "You receive source code and must identify and fix potential bugs, edge cases, and vulnerabilities. "
-            "Look for off-by-one errors, null pointer dereferences, type mismatches, edge case handling, "
-            "and common pitfalls in the target language. "
-            "Fix issues while keeping the intended behavior intact. "
+            "You receive source code and must identify potential bugs, edge cases, and vulnerabilities. "
+            "Do NOT rewrite, fix, optimize, or restructure the code in any way. "
+            "Return the code with its original structure and logic fully intact. "
+            "The only addition allowed is inline comments marking each bug at its exact location, "
+            "using the correct comment syntax for the target language (e.g. # BUG: ... for Python, // BUG: ... for Java/JS/C++). "
+            "Do NOT correct the bug in the code itself — only annotate it as a comment explaining what's wrong and why. "
             "Support Python, Java, C, C++, Rust, and JavaScript. "
             "Return only valid code in the target language."
         )
         instruction = (
             "Analyze this code for potential bugs and vulnerabilities. "
-            "Find and fix: off-by-one errors, missing null checks, uncaught exceptions, "
+            "Find: off-by-one errors, missing null checks, uncaught exceptions, "
             "type mismatches, race conditions, and edge cases. "
-            "Make the code robust and production-ready."
+            "Do NOT fix the bugs. ONLY add inline comments (e.g., # BUG: ... or // BUG: ...) "
+            "at the exact locations of the bugs, explaining the issue. "
+            "Keep the original code logic and structure completely intact."
         )
     else:  # Default: General Polish
         system = (
@@ -265,6 +269,12 @@ def analyze_complexity(payload: RefineRequest, user = Depends(get_current_user))
         "If there are multiple operations, analyze the dominant one. Format your response as: "
         "TIME_COMPLEXITY: O(...) | SPACE_COMPLEXITY: O(...) | EXPLANATION: brief analysis"
     )
+
+    if payload.goal and ("bug" in payload.goal.lower() or "fix" in payload.goal.lower()):
+        complexity_prompt += (
+            " IMPORTANT: You are in 'Find Bugs' mode. Analyze the exact complexity of the ORIGINAL, "
+            "unmodified, buggy code provided. Do NOT analyze a hypothetical fixed or optimized version."
+        )
     
     completion = client.chat.completions.create(
         model="openai/gpt-oss-120b",
