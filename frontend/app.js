@@ -970,11 +970,35 @@ function appendChatBubble(role, content) {
   avatar.className = "chat-avatar";
   avatar.textContent = role === "user" ? "You" : "CR";
   var bubble = document.createElement("div");
-  bubble.className = "chat-bubble";
-  bubble.innerHTML = escHtml(content)
-    .replace(/`([^`]+)`/g, '<code style="font-family:var(--font-mono);background:rgba(255,255,255,0.08);padding:1px 4px;border-radius:3px;">$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\n/g, "<br>");
+  if (role === "system" && window.marked) {
+    bubble.className = "chat-bubble markdown-body";
+    bubble.innerHTML = window.marked.parse(content);
+    
+    // Syntax highlighting and Copy buttons for code blocks
+    bubble.querySelectorAll('pre').forEach((pre) => {
+      pre.style.position = 'relative';
+      
+      const codeBlock = pre.querySelector('code');
+      if (codeBlock && window.hljs) {
+        window.hljs.highlightElement(codeBlock);
+      }
+      
+      // Use event delegation for copy buttons (attached in initChatForm or startApp)
+      // We just need to add the button structure here
+      const btn = document.createElement('button');
+      btn.className = 'copy-code-btn';
+      btn.title = 'Copy code';
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+      pre.appendChild(btn);
+    });
+    
+  } else {
+    bubble.className = "chat-bubble";
+    bubble.innerHTML = escHtml(content)
+      .replace(/`([^`]+)`/g, '<code style="font-family:var(--font-mono);background:rgba(255,255,255,0.08);padding:1px 4px;border-radius:3px;">$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n/g, "<br>");
+  }
   wrapper.appendChild(avatar);
   wrapper.appendChild(bubble);
   thread.appendChild(wrapper);
@@ -1229,6 +1253,27 @@ function displayComplexityAnalysis(complexityData) {
 function initChatForm() {
   var form  = document.getElementById("chat-form");
   var input = document.getElementById("chat-input");
+  var thread = document.getElementById("chat-thread");
+  
+  if (thread) {
+    // Event delegation for copy code buttons in chat
+    thread.addEventListener('click', function(e) {
+      const btn = e.target.closest('.copy-code-btn');
+      if (!btn) return;
+      
+      const pre = btn.closest('pre');
+      const codeBlock = pre ? pre.querySelector('code') : null;
+      
+      if (codeBlock) {
+        navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+          const oldHtml = btn.innerHTML;
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+          setTimeout(() => { btn.innerHTML = oldHtml; }, 2000);
+        });
+      }
+    });
+  }
+
   if (!form || !input) return;
   input.addEventListener("keydown", function(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {

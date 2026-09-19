@@ -1432,6 +1432,70 @@ body::before {
   color: var(--fg);
 }
 
+/* Markdown styling inside chat bubbles */
+.chat-bubble p { margin: 0 0 8px 0; }
+.chat-bubble p:last-child { margin: 0; }
+.chat-bubble strong { font-weight: 600; color: var(--fg); }
+.chat-bubble em { font-style: italic; }
+.chat-bubble ul, .chat-bubble ol { margin: 4px 0 8px 0; padding-left: 20px; }
+.chat-bubble li { margin-bottom: 2px; }
+.chat-bubble h1, .chat-bubble h2, .chat-bubble h3 { 
+  font-size: 1.05em; 
+  margin: 12px 0 6px 0; 
+  font-weight: 600; 
+  border-bottom: 1px solid var(--border); 
+  padding-bottom: 3px; 
+}
+.chat-bubble pre { 
+  background: var(--bg-deep); 
+  border: 1px solid var(--border); 
+  border-radius: 6px; 
+  padding: 10px; 
+  margin: 8px 0; 
+  overflow-x: auto; 
+}
+.chat-bubble code { 
+  font-family: var(--font-mono); 
+  font-size: 0.85em; 
+}
+.chat-bubble p > code, .chat-bubble li > code, .chat-bubble table code { 
+  background: rgba(255,255,255,0.08); 
+  padding: 2px 4px; 
+  border-radius: 3px; 
+}
+.chat-bubble table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+.chat-bubble th, .chat-bubble td {
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  text-align: left;
+}
+.chat-bubble th { background: rgba(255,255,255,0.03); }
+
+/* Copy code button in markdown pre */
+.copy-code-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+}
+.chat-bubble pre:hover .copy-code-btn { opacity: 1; }
+.copy-code-btn:hover { background: var(--bg-hover); color: var(--fg); }
+
 .chat-message-user .chat-bubble {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   border-color: transparent;
