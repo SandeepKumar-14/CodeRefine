@@ -2601,12 +2601,6 @@ body::before {
   background: rgba(255, 255, 255, 0.04);
 }
 
-.topbar-btn.active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(244, 63, 94, 0.1);
-}
-
 .topbar-btn-subtle {
   border-color: transparent;
   color: var(--fg-dim);
