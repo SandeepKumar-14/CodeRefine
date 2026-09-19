@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
@@ -62,6 +62,10 @@ class ComplexityAnalysisResponse(BaseModel):
     time_complexity: str
     space_complexity: str
     explanation: str
+
+
+class ExtractTextResponse(BaseModel):
+    extracted_text: str
 
 
 def get_groq_client() -> Groq:
@@ -384,4 +388,48 @@ def chat_about_code(payload: ChatRequest, user = Depends(get_current_user)) -> C
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+import io
+import pypdf
+import docx
+
+@app.post("/api/extract_text", response_model=ExtractTextResponse)
+async def extract_text(file: UploadFile = File(...), user = Depends(get_current_user)):
+    filename = file.filename.lower()
+    content = await file.read()
+    
+    # Check file size (approx 5MB limit, though frontend should also enforce)
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 5MB.")
+    
+    extracted_text = ""
+    
+    try:
+        if filename.endswith('.txt'):
+            extracted_text = content.decode('utf-8')
+        elif filename.endswith('.pdf'):
+            reader = pypdf.PdfReader(io.BytesIO(content))
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    extracted_text += text + "\n"
+            if not extracted_text.strip():
+                raise HTTPException(status_code=400, detail="This PDF appears to have no extractable text (scanned/image-based PDFs aren't supported).")
+        elif filename.endswith('.docx'):
+            doc = docx.Document(io.BytesIO(content))
+            extracted_text = "\n".join([p.text for p in doc.paragraphs])
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload .txt, .pdf, or .docx.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to extract text from file: {str(e)}")
+        
+    # Truncate to safe length (~10,000 characters)
+    max_length = 10000
+    if len(extracted_text) > max_length:
+        extracted_text = extracted_text[:max_length] + f"\n\n[... file truncated to first {max_length} characters ...]"
+        
+    return ExtractTextResponse(extracted_text=extracted_text)
 

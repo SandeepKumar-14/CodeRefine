@@ -1250,9 +1250,42 @@ function displayComplexityAnalysis(complexityData) {
 }
 
 /* ── CHAT FORM ─────────────────────────────────────────────── */
+let currentChatAttachment = null;
+
 function initChatForm() {
   var form  = document.getElementById("chat-form");
   var input = document.getElementById("chat-input");
+  var thread = document.getElementById("chat-thread");
+  var attachBtn = document.getElementById("chat-attach-btn");
+  var fileInput = document.getElementById("chat-file-input");
+  var previewContainer = document.getElementById("chat-attachment-preview");
+  var previewName = document.getElementById("chat-attachment-name");
+  var previewRemove = document.getElementById("chat-attachment-remove");
+  
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener("click", () => fileInput.click());
+    
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("File too large. Maximum size is 5MB.", "error");
+        fileInput.value = "";
+        return;
+      }
+      
+      currentChatAttachment = file;
+      previewName.textContent = file.name;
+      previewContainer.style.display = "flex";
+    });
+    
+    previewRemove.addEventListener("click", () => {
+      currentChatAttachment = null;
+      fileInput.value = "";
+      previewContainer.style.display = "none";
+    });
+  }
   var thread = document.getElementById("chat-thread");
   
   if (thread) {
@@ -1288,15 +1321,69 @@ function initChatForm() {
   form.addEventListener("submit", async function(e) {
     e.preventDefault();
     var question = input.value.trim();
-    if (!question) return;
+    if (!question && !currentChatAttachment) return;
+    
     input.value = ""; input.style.height = "auto";
     switchAIPanel("assistant");
-    appendChatBubble("user", question);
-    appendTypingIndicator();
+    
+    let combinedQuestion = question;
+    let fileToUpload = currentChatAttachment;
+    
+    if (fileToUpload) {
+      // Clear attachment immediately from UI
+      currentChatAttachment = null;
+      if (fileInput) fileInput.value = "";
+      if (previewContainer) previewContainer.style.display = "none";
+      
+      appendChatBubble("user", "Attached: " + fileToUpload.name + (question ? "\n\n" + question : ""));
+      appendTypingIndicator();
+      setStatus("Extracting text…", true);
+      
+      try {
+        var token = await getAuthToken();
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+        
+        var extractHeaders = {};
+        if (token) extractHeaders["Authorization"] = "Bearer " + token;
+        
+        const extractRes = await fetch(API_BASE + "/api/extract_text", {
+          method: "POST",
+          headers: extractHeaders,
+          body: formData
+        });
+        
+        if (!extractRes.ok) {
+          const errData = await extractRes.json().catch(()=>({}));
+          throw new Error(errData.detail || "Extraction failed");
+        }
+        
+        const extractData = await extractRes.json();
+        const extractedText = extractData.extracted_text;
+        
+        combinedQuestion = `The user uploaded a file named ${fileToUpload.name}. Its content:\n\n${extractedText}\n\nUser's message: ${question}`;
+        
+      } catch (err) {
+        console.error(err);
+        removeTypingIndicator();
+        appendChatBubble("system", "Attachment error: " + err.message);
+        setStatus("Error while extracting");
+        return; // Halt chat flow on extraction error
+      }
+    } else {
+      appendChatBubble("user", question);
+      appendTypingIndicator();
+    }
+    
     setStatus("Thinking…", true);
-    chatHistory.push({ role: "user", content: question });
+    
+    // Store original question in history for user readability if no file, 
+    // or store the combined context if there was a file.
+    // To keep UI clean, we just record the system augmented prompt as the user prompt.
+    chatHistory.push({ role: "user", content: combinedQuestion });
+    
     try {
-      var token   = await getAuthToken();
+      var token = await getAuthToken();
       var headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = "Bearer " + token;
       var res = await fetch(API_BASE + "/api/chat", {
