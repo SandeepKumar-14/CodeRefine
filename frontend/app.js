@@ -392,6 +392,81 @@ function initEditor() {
   editor.addCommand(monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, function() {
     document.getElementById("btn-format") && document.getElementById("btn-format").click();
   });
+
+  // AI Selection Widget Logic
+  let aiWidget = document.getElementById("ai-selection-widget");
+  if (!aiWidget) {
+    aiWidget = document.createElement("div");
+    aiWidget.id = "ai-selection-widget";
+    aiWidget.className = "ai-selection-widget";
+    aiWidget.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Ask AI';
+    document.body.appendChild(aiWidget);
+
+    aiWidget.addEventListener("mousedown", function(e) {
+      e.preventDefault(); // Prevent losing editor selection
+    });
+    
+    aiWidget.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const selection = editor.getSelection();
+      if (!selection || selection.isEmpty()) return;
+      
+      const text = editor.getModel().getValueInRange(selection);
+      const startLine = selection.startLineNumber;
+      const endLine = selection.endLineNumber;
+      const linesText = (startLine === endLine) ? `Line ${startLine}` : `Lines ${startLine}–${endLine}`;
+      
+      const promptStub = `Explain this code:\n\n*${linesText}:*\n\`\`\`${currentLanguage}\n${text}\n\`\`\`\n\n`;
+      
+      const chatInput = document.getElementById("chat-input");
+      if (chatInput) {
+        chatInput.value = promptStub;
+        chatInput.focus();
+        
+        const assistantPanel = document.getElementById("assistant-panel");
+        if (assistantPanel && assistantPanel.classList.contains("ai-body-hidden")) {
+          if (typeof switchAIPanel === "function") switchAIPanel("assistant");
+        }
+      }
+      
+      aiWidget.classList.remove("visible");
+    });
+  }
+
+  editor.onDidChangeCursorSelection(function(e) {
+    if (!aiWidget) return;
+    if (e.selection.isEmpty()) {
+      aiWidget.classList.remove("visible");
+      return;
+    }
+    
+    clearTimeout(aiWidget.hideTimeout);
+    aiWidget.hideTimeout = setTimeout(() => {
+      const selection = editor.getSelection();
+      if (selection.isEmpty()) return;
+      
+      const position = editor.getScrolledVisiblePosition(editor.getPosition());
+      if (position) {
+        const editorDOM = editor.getContainerDOMNode();
+        const rect = editorDOM.getBoundingClientRect();
+        
+        const top = rect.top + position.top - 40;
+        const left = rect.left + position.left;
+        
+        aiWidget.style.top = `${Math.max(10, top)}px`;
+        aiWidget.style.left = `${Math.max(rect.left + 10, left)}px`;
+        aiWidget.classList.add("visible");
+      }
+    }, 150);
+  });
+  
+  editor.onDidScrollChange(function() {
+    if (aiWidget && aiWidget.classList.contains("visible")) {
+      aiWidget.classList.remove("visible");
+    }
+  });
 }
 
 function initLanguageSelect() {
