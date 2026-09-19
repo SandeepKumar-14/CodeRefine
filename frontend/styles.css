@@ -2507,7 +2507,8 @@ body::before {
 .app-body {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr auto 360px;
+  --panel-width: 360px;
+  grid-template-columns: 1fr auto var(--panel-width);
   overflow: hidden;
   min-height: 0;
 }
@@ -2710,15 +2711,16 @@ html[data-theme="nebula"] .ai-panel {
 }
 
 .resize-handle {
-  width: 4px;
+  width: 8px; /* Wider handle for easier grabbing */
   background: transparent;
-  cursor: ew-resize;
+  cursor: col-resize;
   transition: background 0.2s;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 100;
+  margin-left: -4px; /* Pull it slightly over the border */
 }
 
 .resize-handle:hover,
@@ -2728,7 +2730,7 @@ html[data-theme="nebula"] .ai-panel {
 
 .resize-collapse-btn {
   position: absolute;
-  width: 20px;
+  width: 24px;
   height: 24px;
   border-radius: 4px;
   background: var(--bg-elevated);
@@ -2738,9 +2740,9 @@ html[data-theme="nebula"] .ai-panel {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
+  opacity: 0.4; /* Slightly visible always */
   transition: opacity 0.2s, background 0.2s, color 0.2s;
-  z-index: 11;
+  z-index: 101;
 }
 
 .resize-handle:hover .resize-collapse-btn,
@@ -2963,13 +2965,17 @@ html[data-theme="nebula"] .ai-panel {
 
 @media (max-width: 1024px) {
   .app-body {
-    grid-template-columns: 1fr 300px;
+    grid-template-columns: 1fr auto 300px;
   }
 }
 
 @media (max-width: 760px) {
   .app-body {
     grid-template-columns: 1fr;
+  }
+
+  .resize-handle {
+    display: none;
   }
 
   .ai-panel {

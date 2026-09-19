@@ -1718,7 +1718,7 @@ function initResizer() {
   let isCollapsed = false;
   let lastWidth = localStorage.getItem('coderefine:panelWidth') || 360;
   
-  appBody.style.gridTemplateColumns = `1fr auto ${lastWidth}px`;
+  appBody.style.setProperty('--panel-width', `${lastWidth}px`);
 
   handle.addEventListener('mousedown', (e) => {
     if (e.target.closest('#ai-panel-collapse-btn')) return;
@@ -1726,7 +1726,7 @@ function initResizer() {
     
     isResizing = true;
     handle.classList.add('active');
-    document.body.style.cursor = 'ew-resize';
+    document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   });
 
@@ -1740,7 +1740,7 @@ function initResizer() {
     if (newWidth < minWidth) newWidth = minWidth;
     if (newWidth > maxWidth) newWidth = maxWidth;
     
-    appBody.style.gridTemplateColumns = `1fr auto ${newWidth}px`;
+    appBody.style.setProperty('--panel-width', `${newWidth}px`);
     lastWidth = newWidth;
     
     if (editor && typeof editor.layout === 'function') {
@@ -1762,13 +1762,13 @@ function initResizer() {
     collapseBtn.addEventListener('click', () => {
       isCollapsed = !isCollapsed;
       
-      appBody.style.transition = 'grid-template-columns 0.3s cubic-bezier(0.16,1,0.3,1)';
+      appBody.style.transition = 'none'; // Use CSS vars instead of direct transition for smoother resize
       
       if (isCollapsed) {
-        appBody.style.gridTemplateColumns = `1fr auto 0px`;
+        appBody.style.setProperty('--panel-width', '0px');
         collapseIcon.innerHTML = `<polyline points="15 18 9 12 15 6"></polyline>`;
       } else {
-        appBody.style.gridTemplateColumns = `1fr auto ${lastWidth}px`;
+        appBody.style.setProperty('--panel-width', `${lastWidth}px`);
         collapseIcon.innerHTML = `<polyline points="9 18 15 12 9 6"></polyline>`;
       }
       
