@@ -504,15 +504,27 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
             )
             resp.raise_for_status()
             data = resp.json()
+            print(f"JDoodle Raw Response: {data}")
             
-            if "error" in data:
-                return ExecuteResponse(output=data["error"], statusCode=400)
+            error_val = data.get("error")
+            if error_val is not None:
+                return ExecuteResponse(output=f"Execution service error: {error_val}", statusCode=data.get("statusCode", 400))
+                
+            output_val = data.get("output")
+            if output_val is None:
+                status_code = data.get("statusCode", 500)
+                msg = data.get("message")
+                if msg:
+                    out_text = f"Execution service error: {msg}"
+                else:
+                    out_text = f"Execution failed, please try again. (Raw response: {data})"
+                return ExecuteResponse(output=out_text, statusCode=status_code)
                 
             return ExecuteResponse(
-                output=data.get("output", ""),
+                output=str(output_val),
                 statusCode=data.get("statusCode", 200),
-                memory=data.get("memory"),
-                cpuTime=data.get("cpuTime")
+                memory=data.get("memory") and str(data.get("memory")),
+                cpuTime=data.get("cpuTime") and str(data.get("cpuTime"))
             )
             
     except httpx.TimeoutException:
