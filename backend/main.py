@@ -502,9 +502,10 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
                     "stdin": payload.stdin or ""
                 }
             )
+            print(f"JDoodle Raw Response Text: {resp.text}")
             resp.raise_for_status()
             data = resp.json()
-            print(f"JDoodle Raw Response: {data}")
+            print(f"JDoodle Raw JSON: {data}")
             
             error_val = data.get("error")
             if error_val is not None:
