@@ -69,6 +69,10 @@ function closeTab(id, event) {
     if (!confirm(`Close ${tab.filename}? Unsaved changes will be lost.`)) return;
   }
   
+  if (tab.model) {
+    tab.model.dispose();
+  }
+  
   tabs.splice(tabIndex, 1);
   if (tabs.length === 0) {
     createTab(); // Keep at least one tab open
@@ -107,9 +111,17 @@ function switchTab(id) {
   if (editor) {
     isSwitchingTab = true;
     
-    // Apply changes synchronously to prevent race conditions during rapid switching
-    editor.setValue(newTab.code);
-    window.monaco.editor.setModelLanguage(editor.getModel(), languageToMonaco(newTab.language));
+    // Use distinct Monaco Models for each tab to preserve undo history, cursor, and scroll position
+    if (!newTab.model && window.monaco) {
+      newTab.model = window.monaco.editor.createModel(newTab.code, languageToMonaco(newTab.language));
+    }
+    
+    if (newTab.model) {
+      editor.setModel(newTab.model);
+    } else {
+      editor.setValue(newTab.code);
+      window.monaco.editor.setModelLanguage(editor.getModel(), languageToMonaco(newTab.language));
+    }
     
     const langSel = document.getElementById('language-select');
     if (langSel) langSel.value = newTab.language;
