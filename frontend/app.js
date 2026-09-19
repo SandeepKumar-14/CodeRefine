@@ -84,7 +84,7 @@ function switchTab(id) {
   const newTab = tabs.find(t => t.id === id);
   if (!newTab) return;
   
-  if (activeTabId && window.editor) {
+  if (activeTabId && editor) {
     const oldTab = tabs.find(t => t.id === activeTabId);
     if (oldTab) {
       const summaryEl = document.getElementById('insights-summary');
@@ -104,12 +104,12 @@ function switchTab(id) {
   activeTabId = id;
   renderTabs();
   
-  if (window.editor) {
+  if (editor) {
     isSwitchingTab = true;
     
     // Apply changes synchronously to prevent race conditions during rapid switching
-    window.editor.setValue(newTab.code);
-    window.monaco.editor.setModelLanguage(window.editor.getModel(), languageToMonaco(newTab.language));
+    editor.setValue(newTab.code);
+    window.monaco.editor.setModelLanguage(editor.getModel(), languageToMonaco(newTab.language));
     
     const langSel = document.getElementById('language-select');
     if (langSel) langSel.value = newTab.language;
