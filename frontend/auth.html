@@ -1,400 +1,693 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="dark">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CodeRefine — sign in</title>
-<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./config.js"></script>
-<script>fetch('./config.local.js').then(r=>r.ok&&r.text()).then(t=>t&&new Function(t)()).catch(()=>{})</script>
-<style>
-:root{
-  --bg:#0D1117;
-  --surface:#151B23;
-  --surface-2:#1B222C;
-  --line:#262E3A;
-  --ink:#E8EAED;
-  --ink-2:#9BA4B0;
-  --ink-3:#6B7684;
-  --crit:#E05A4E;
-  --high:#E8A33D;
-  --fixed:#3FBF8F;
-  --accent:#6FA8FF;
-  --radius:10px;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  color-scheme:dark;
-}
-@media (prefers-color-scheme:light){
-  :root:not([data-theme="dark"]){
-    --bg:#FBFBF8; --surface:#FFFFFF; --surface-2:#F4F5F2; --line:#E2E3DE;
-    --ink:#14181D; --ink-2:#4E5762; --ink-3:#7E8792;
-    --crit:#C0392B; --high:#B07314; --fixed:#1F8A5F; --accent:#2B5FC4;
-    color-scheme:light;
-  }
-}
-:root[data-theme="light"]{
-  --bg:#FBFBF8; --surface:#FFFFFF; --surface-2:#F4F5F2; --line:#E2E3DE;
-  --ink:#14181D; --ink-2:#4E5762; --ink-3:#7E8792;
-  --crit:#C0392B; --high:#B07314; --fixed:#1F8A5F; --accent:#2B5FC4;
-  color-scheme:light;
-}
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
-  font-family:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
-}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-button{font:inherit}
+  <meta charset="utf-8" />
+  <title>Sign In – Coderefine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="stylesheet" href="./styles.css?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <!-- config.local.js is gitignored; when present locally it overrides config.js -->
+  <script>fetch('./config.local.js').then(r=>r.ok&&r.text()).then(t=>t&&new Function(t)()).catch(()=>{})</script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-.shell{
-  min-height:100vh;
-  min-height:100dvh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:40px 24px;
-}
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+    }
 
-/* ---------------- auth form (centered) ---------------- */
-.formside{display:flex;align-items:center;justify-content:center;width:100%}
-.formwrap{width:100%;max-width:392px}
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      font-family: 'Sora', sans-serif;
+    }
 
+    /* Animated particle field */
+    .particle-field {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
 
-.back{
-  display:none;align-items:center;gap:7px;background:none;border:0;cursor:pointer;
-  color:var(--ink-3);font:inherit;font-size:13.5px;padding:0;margin-bottom:22px;
-}
-.back:hover{color:var(--ink-2)}
-.back svg{width:14px;height:14px}
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: radial-gradient(circle, rgba(100, 200, 255, 0.8), rgba(100, 200, 255, 0));
+      border-radius: 50%;
+      pointer-events: none;
+    }
 
-.status-line{
-  display:inline-flex;align-items:center;gap:7px;
-  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--fixed);
-  border:1px solid color-mix(in srgb, var(--fixed) 35%, transparent);
-  background:color-mix(in srgb, var(--fixed) 9%, transparent);
-  padding:5px 10px;border-radius:6px;margin-bottom:22px;
-}
-.status-line i{width:6px;height:6px;border-radius:50%;background:var(--fixed);flex:none}
+    /* Glassmorphic orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 2;
+    }
 
-h2{font-size:1.55rem;letter-spacing:-.025em;margin:0 0 8px;font-weight:700}
-.sub{color:var(--ink-2);font-size:14.5px;margin:0 0 30px}
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      top: -200px;
+      right: -100px;
+      animation: float-slow 20s ease-in-out infinite;
+    }
 
-/* Auth Message Alert */
-.auth-message{
-  display:none;
-  padding:10px 14px;
-  border-radius:8px;
-  font-size:13px;
-  font-family:"JetBrains Mono",monospace;
-  margin-bottom:18px;
-  line-height:1.4;
-}
-.auth-message.show{display:block}
-.auth-message.error{background:color-mix(in srgb, var(--crit) 14%, transparent);border:1px solid color-mix(in srgb, var(--crit) 40%, transparent);color:var(--crit)}
-.auth-message.success{background:color-mix(in srgb, var(--fixed) 14%, transparent);border:1px solid color-mix(in srgb, var(--fixed) 40%, transparent);color:var(--fixed)}
+    .orb-2 {
+      width: 350px;
+      height: 350px;
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      bottom: -100px;
+      left: -100px;
+      animation: float-slow 25s ease-in-out infinite reverse;
+    }
 
-form{display:flex;flex-direction:column;gap:18px}
-.field{display:flex;flex-direction:column;gap:8px}
-.field-head{display:flex;align-items:baseline;justify-content:space-between}
-label{
-  font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.02em;
-  color:var(--ink-3);font-weight:500;
-}
-.linklike{
-  background:none;border:0;font:inherit;font-size:12.5px;color:var(--accent);
-  cursor:pointer;padding:0;text-decoration:none;
-}
-.linklike:hover{text-decoration:underline}
+    @keyframes float-slow {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -30px); }
+      50% { transform: translate(-20px, 20px); }
+      75% { transform: translate(20px, 10px); }
+    }
 
-.input-row{position:relative}
-input{
-  width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
-  color:var(--ink);font-family:"JetBrains Mono",monospace;font-size:14px;
-  padding:12px 13px;transition:border-color .12s ease;
-}
-input:focus{border-color:var(--ink-3);outline:none}
-input::placeholder{color:var(--ink-3)}
-.toggle-vis{
-  position:absolute;right:9px;top:50%;transform:translateY(-50%);
-  background:none;border:0;cursor:pointer;color:var(--ink-3);padding:6px;display:flex;
-}
-.toggle-vis:hover{color:var(--ink-2)}
-.toggle-vis svg{width:17px;height:17px}
-.hint{font-size:12.5px;color:var(--ink-3);margin:0}
+    #auth-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+      padding: 20px;
+    }
 
-.check-row{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink-2);margin-top:2px}
-.check-row input[type="checkbox"]{
-  appearance:none;width:16px;height:16px;border:1px solid var(--line);border-radius:4px;
-  background:var(--bg);flex:none;display:grid;place-items:center;cursor:pointer;padding:0;margin:0;
-}
-.check-row input[type="checkbox"]:checked{background:var(--ink);border-color:var(--ink)}
-.check-row input[type="checkbox"]:checked::after{
-  content:"";width:8px;height:5px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);
-  transform:rotate(-45deg) translateY(-1px);
-}
-.check-row label{font-family:inherit;font-size:14px;color:var(--ink-2);letter-spacing:0;cursor:pointer}
+    .auth-container {
+      width: 100%;
+      max-width: 480px;
+    }
 
-.strength{display:flex;gap:4px;margin-top:2px}
-.strength i{height:3px;flex:1;background:var(--line);border-radius:2px;transition:background .15s ease}
+    .auth-header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-.btn-primary{
-  width:100%;background:var(--ink);color:var(--bg);border:0;border-radius:8px;
-  padding:13px 16px;font-weight:600;font-size:15px;cursor:pointer;margin-top:4px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:opacity .15s ease;
-}
-.btn-primary:hover{opacity:.88}
-.btn-primary svg{width:15px;height:15px}
+    @keyframes fade-in-down {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-.divider{display:flex;align-items:center;gap:14px;margin:26px 0;color:var(--ink-3);font-size:12.5px}
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+    .auth-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border-radius: 24px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2));
+      border: 2px solid rgba(79, 70, 229, 0.4);
+      font-size: 36px;
+      font-weight: 800;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background: linear-gradient(135deg, #64b5f6, #9c27b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: logo-pulse 3s ease-in-out infinite;
+    }
 
-.oauth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.oauth{
-  display:flex;align-items:center;justify-content:center;gap:9px;
-  border:1px solid var(--line);background:var(--surface);color:var(--ink);
-  border-radius:8px;padding:11px 10px;font:inherit;font-size:14px;font-weight:500;
-  cursor:pointer;transition:border-color .15s ease;
-}
-.oauth:hover{border-color:var(--ink-3)}
-.oauth svg{width:17px;height:17px;flex:none}
+    @keyframes logo-pulse {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(79, 70, 229, 0.5);
+        transform: scale(1.05);
+      }
+    }
 
-.switch{text-align:center;margin-top:26px;font-size:14px;color:var(--ink-2)}
-.switch button{background:none;border:0;font:inherit;color:var(--ink);font-weight:600;cursor:pointer;padding:0}
-.switch button:hover{text-decoration:underline}
+    .auth-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
 
-.panel{display:none}
-.panel.is-on{display:block;animation:rise .22s ease both}
-@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.panel.is-on{animation:none}}
+    .auth-subtitle {
+      font-size: 14px;
+      color: #cbd5e1;
+      letter-spacing: 0.3px;
+    }
 
-.theme-toggle{
-  position:fixed;bottom:18px;right:18px;z-index:20;
-  appearance:none;background:var(--surface);border:1px solid var(--line);color:var(--ink-3);
-  font:inherit;font-size:12.5px;padding:8px 12px;border-radius:7px;cursor:pointer;
-}
-.theme-toggle:hover{color:var(--ink);border-color:var(--ink-3)}
-</style>
+    .auth-card {
+      background: rgba(15, 20, 40, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(100, 200, 255, 0.15);
+      border-radius: 20px;
+      padding: 40px;
+      animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.2), rgba(168, 85, 247, 0.1));
+      border-radius: 20px;
+      z-index: -1;
+    }
+
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .auth-field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .auth-field input {
+      padding: 12px 16px;
+      background: rgba(30, 35, 55, 0.7);
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: 'Sora', sans-serif;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-field input::placeholder {
+      color: #64748b;
+    }
+
+    .auth-field input:focus {
+      outline: none;
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 3px rgba(100, 200, 255, 0.1);
+      background: rgba(30, 35, 55, 0.9);
+    }
+
+    .auth-submit {
+      padding: 13px 24px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.3px;
+    }
+
+    .auth-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .auth-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(79, 70, 229, 0.5);
+    }
+
+    .auth-submit:hover:not(:disabled)::before {
+      left: 100%;
+    }
+
+    .auth-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #64b5f6;
+    }
+
+    .forgot-link {
+      font-size: 12px;
+      color: #64b5f6;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      font-weight: 600;
+    }
+
+    .forgot-link:hover {
+      color: #a5d6ff;
+      text-decoration: underline;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(100, 200, 255, 0.2), transparent);
+    }
+
+    .auth-oauth-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .auth-oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(30, 35, 55, 0.5);
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      border-radius: 12px;
+      color: #cbd5e1;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: 'Sora', sans-serif;
+      letter-spacing: 0.3px;
+    }
+
+    .auth-oauth-btn:hover {
+      background: rgba(100, 200, 255, 0.1);
+      border-color: #64b5f6;
+      color: #64b5f6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(100, 200, 255, 0.15);
+    }
+
+    .auth-mode-switch {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .auth-mode-switch a {
+      color: #64b5f6;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .auth-mode-switch a:hover {
+      color: #a5d6ff;
+      text-decoration: underline;
+    }
+
+    .auth-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 28px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+
+    .auth-back-link:hover {
+      color: #64b5f6;
+      transform: translateX(-4px);
+    }
+
+    #auth-message {
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-top: 20px;
+      display: none;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      letter-spacing: 0.3px;
+    }
+
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #auth-message.show {
+      display: block;
+    }
+
+    #auth-message.error {
+      background: rgba(244, 63, 94, 0.1);
+      color: #ff6b7a;
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    #auth-message.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #2dd4bf;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    #auth-signup-mode,
+    #auth-forgot-mode {
+      display: none;
+    }
+
+    .auth-page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 28px;
+      }
+
+      .auth-title {
+        font-size: 24px;
+      }
+
+      .auth-oauth-row {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-logo {
+        width: 70px;
+        height: 70px;
+        font-size: 30px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Animated particle field -->
+  <div class="particle-field" id="particleField"></div>
 
-<div class="shell">
-  <!-- Centered form -->
-  <div class="formside">
-    <div class="formwrap">
-      <div id="auth-message" class="auth-message"></div>
+  <!-- Glassmorphic orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-      <!-- SIGN IN -->
-      <section class="panel is-on" id="panel-signin">
-        <span class="status-line"><i></i>workbench ready</span>
-        <h2>Sign in</h2>
-        <p class="sub">Pick up where your last review left off.</p>
+  <!-- Auth Container -->
+  <div id="auth-root">
+    <div class="auth-container">
+      <!-- Header -->
+      <div class="auth-header">
+        <div class="auth-logo logo-text">ERROR FREE</div>
+        <h1 class="auth-title">Coderefine</h1>
+        <p class="auth-subtitle">AI-powered code refinement workbench</p>
+      </div>
 
-        <form id="auth-login-form">
-          <div class="field">
-            <label for="login-email">Email address</label>
-            <div class="input-row">
-              <input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" required>
-            </div>
-          </div>
+      <!-- Auth Card -->
+      <div class="auth-card">
+        <div id="auth-forms-container">
 
-          <div class="field">
-            <div class="field-head">
-              <label for="login-password">Password</label>
-              <button type="button" class="linklike" data-go="forgot">Forgot?</button>
-            </div>
-            <div class="input-row">
-              <input id="login-password" type="password" placeholder="••••••••••" autocomplete="current-password" required>
-              <button type="button" class="toggle-vis" data-for="login-password" aria-label="Show password">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <!-- LOGIN MODE -->
+          <div id="auth-login-mode">
+            <form id="auth-login-form" class="auth-form">
+              <div class="auth-field">
+                <label>Email Address</label>
+                <input id="login-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+              </div>
+              <div class="auth-field">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label>Password</label>
+                  <a onclick="switchMode('forgot')" class="forgot-link">Forgot?</a>
+                </div>
+                <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••"
+                  required />
+              </div>
+              <div class="checkbox-group">
+                <input id="login-remember" type="checkbox" />
+                <label style="cursor: pointer; margin: 0;">Remember me</label>
+              </div>
+              <button type="submit" class="auth-submit" id="btn-login-submit">Sign In</button>
+            </form>
+
+            <div class="auth-divider">or continue with</div>
+
+            <div class="auth-oauth-row">
+              <button type="button" class="auth-oauth-btn btn-google-login" id="btn-google-login">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4" />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853" />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05" />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335" />
+                </svg>
+                Google
+              </button>
+              <button type="button" class="auth-oauth-btn btn-github-login" id="btn-github-login">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+                  <path
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                GitHub
               </button>
             </div>
-          </div>
 
-          <div class="check-row">
-            <input type="checkbox" id="login-remember">
-            <label for="login-remember">Keep this session for 12 hours</label>
-          </div>
-
-          <button id="btn-login-submit" class="btn-primary" type="submit">
-            Sign in
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </form>
-
-        <div class="divider">or continue with</div>
-        <div class="oauth-row">
-          <button class="oauth btn-google-login" type="button">
-            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.82-.07-1.42-.22-2.05H12v3.9h6.5c-.13 1.03-.84 2.6-2.42 3.65l-.02.14 3.52 2.68.24.02c2.24-2.02 3.68-5 3.68-8.34"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.05 7.93-2.87l-3.78-2.84c-1.02.68-2.4 1.16-4.15 1.16-3.18 0-5.88-2.04-6.84-4.87l-.14.01-3.68 2.78-.05.13C3.26 21.3 7.3 24 12 24"/><path fill="#FBBC05" d="M5.16 14.58a7.4 7.4 0 0 1-.4-2.38c0-.83.15-1.63.39-2.38L5.14 9.7 1.4 6.86l-.12.06A11.94 11.94 0 0 0 0 12.2c0 1.93.47 3.76 1.28 5.36l3.88-2.98"/><path fill="#EA4335" d="M12 4.75c2.25 0 3.77.94 4.64 1.73l3.38-3.24C17.94 1.4 15.24 0 12 0 7.3 0 3.26 2.7 1.28 6.64l3.87 2.98C6.12 6.8 8.82 4.75 12 4.75"/></svg>
-            Google
-          </button>
-          <button class="oauth btn-github-login" type="button">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.5c0 5 3.24 9.24 7.75 10.74.57.1.78-.25.78-.55v-2c-3.15.68-3.82-1.35-3.82-1.35-.52-1.31-1.26-1.66-1.26-1.66-1.03-.7.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.73 2.65 1.23 3.3.94.1-.73.4-1.23.72-1.51-2.51-.29-5.15-1.26-5.15-5.6 0-1.24.44-2.25 1.17-3.05-.12-.29-.5-1.46.11-3.04 0 0 .96-.31 3.15 1.16a10.9 10.9 0 0 1 5.74 0c2.19-1.47 3.15-1.16 3.15-1.16.61 1.58.23 2.75.11 3.04.73.8 1.17 1.81 1.17 3.05 0 4.35-2.65 5.31-5.17 5.59.41.35.77 1.04.77 2.1v3.11c0 .3.21.66.79.55A11.02 11.02 0 0 0 23.02 11.5C23.02 5.24 18.27.5 12 .5Z"/></svg>
-            GitHub
-          </button>
-        </div>
-
-        <p class="switch">Don't have an account? <button type="button" data-go="signup">Create one</button></p>
-      </section>
-
-      <!-- SIGN UP -->
-      <section class="panel" id="panel-signup">
-        <button class="back" type="button" data-go="signin" style="display:inline-flex">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-          Back to sign in
-        </button>
-
-        <h2>Create your account</h2>
-        <p class="sub">Free plan includes 50 reviews a month.</p>
-
-        <form id="auth-signup-form">
-          <div class="field">
-            <label for="signup-email">Email address</label>
-            <div class="input-row">
-              <input id="signup-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+            <div class="auth-mode-switch">
+              Don't have an account? <a onclick="switchMode('signup')">Sign up</a>
             </div>
           </div>
 
-          <div class="field">
-            <label for="signup-password">Password</label>
-            <div class="input-row">
-              <input id="signup-password" type="password" placeholder="At least 6 characters" autocomplete="new-password" required oninput="updateStrength(this.value)">
-              <button type="button" class="toggle-vis" data-for="signup-password" aria-label="Show password">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <!-- SIGNUP MODE -->
+          <div id="auth-signup-mode">
+            <a onclick="switchMode('login')" class="auth-back-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back to Sign In
+            </a>
+
+            <h2 class="auth-page-title">Create your account</h2>
+
+            <form id="auth-signup-form" class="auth-form">
+              <div class="auth-field">
+                <label>Email Address</label>
+                <input id="signup-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+              </div>
+              <div class="auth-field">
+                <label>Password</label>
+                <input id="signup-password" type="password" autocomplete="new-password" placeholder="••••••••"
+                  required />
+              </div>
+              <button type="submit" class="auth-submit" id="btn-signup-submit">Create Account</button>
+            </form>
+
+            <div class="auth-divider">or continue with</div>
+
+            <div class="auth-oauth-row">
+              <button type="button" class="auth-oauth-btn btn-google-login">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4" />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853" />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05" />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335" />
+                </svg>
+                Google
+              </button>
+              <button type="button" class="auth-oauth-btn btn-github-login">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+                  <path
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                </svg>
+                GitHub
               </button>
             </div>
-            <div class="strength" id="strength"><i></i><i></i><i></i><i></i></div>
-            <p class="hint" id="strength-hint">Use a mix of letters, numbers, and symbols.</p>
-          </div>
 
-          <div class="check-row">
-            <input type="checkbox" id="terms" required>
-            <label for="terms">I agree to the Terms and Privacy Policy</label>
-          </div>
-
-          <button id="btn-signup-submit" class="btn-primary" type="submit">
-            Create account
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </form>
-
-        <div class="divider">or continue with</div>
-        <div class="oauth-row">
-          <button class="oauth btn-google-login" type="button">
-            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.82-.07-1.42-.22-2.05H12v3.9h6.5c-.13 1.03-.84 2.6-2.42 3.65l-.02.14 3.52 2.68.24.02c2.24-2.02 3.68-5 3.68-8.34"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.05 7.93-2.87l-3.78-2.84c-1.02.68-2.4 1.16-4.15 1.16-3.18 0-5.88-2.04-6.84-4.87l-.14.01-3.68 2.78-.05.13C3.26 21.3 7.3 24 12 24"/><path fill="#FBBC05" d="M5.16 14.58a7.4 7.4 0 0 1-.4-2.38c0-.83.15-1.63.39-2.38L5.14 9.7 1.4 6.86l-.12.06A11.94 11.94 0 0 0 0 12.2c0 1.93.47 3.76 1.28 5.36l3.88-2.98"/><path fill="#EA4335" d="M12 4.75c2.25 0 3.77.94 4.64 1.73l3.38-3.24C17.94 1.4 15.24 0 12 0 7.3 0 3.26 2.7 1.28 6.64l3.87 2.98C6.12 6.8 8.82 4.75 12 4.75"/></svg>
-            Google
-          </button>
-          <button class="oauth btn-github-login" type="button">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.5c0 5 3.24 9.24 7.75 10.74.57.1.78-.25.78-.55v-2c-3.15.68-3.82-1.35-3.82-1.35-.52-1.31-1.26-1.66-1.26-1.66-1.03-.7.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.73 2.65 1.23 3.3.94.1-.73.4-1.23.72-1.51-2.51-.29-5.15-1.26-5.15-5.6 0-1.24.44-2.25 1.17-3.05-.12-.29-.5-1.46.11-3.04 0 0 .96-.31 3.15 1.16a10.9 10.9 0 0 1 5.74 0c2.19-1.47 3.15-1.16 3.15-1.16.61 1.58.23 2.75.11 3.04.73.8 1.17 1.81 1.17 3.05 0 4.35-2.65 5.31-5.17 5.59.41.35.77 1.04.77 2.1v3.11c0 .3.21.66.79.55A11.02 11.02 0 0 0 23.02 11.5C23.02 5.24 18.27.5 12 .5Z"/></svg>
-            GitHub
-          </button>
-        </div>
-
-        <p class="switch">Already have an account? <button type="button" data-go="signin">Sign in</button></p>
-      </section>
-
-      <!-- FORGOT PASSWORD -->
-      <section class="panel" id="panel-forgot">
-        <button class="back" type="button" data-go="signin" style="display:inline-flex">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-          Back to sign in
-        </button>
-
-        <h2>Reset your password</h2>
-        <p class="sub">We'll send you an email with a link to reset your password.</p>
-
-        <form id="auth-forgot-form">
-          <div class="field">
-            <label for="forgot-email">Email address</label>
-            <div class="input-row">
-              <input id="forgot-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+            <div class="auth-mode-switch">
+              Already have an account? <a onclick="switchMode('login')">Sign in</a>
             </div>
           </div>
 
-          <button id="btn-forgot-submit" class="btn-primary" type="submit">
-            Send Reset Link
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </form>
+          <!-- FORGOT PASSWORD MODE -->
+          <div id="auth-forgot-mode">
+            <a onclick="switchMode('login')" class="auth-back-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back to Sign In
+            </a>
 
-        <p class="switch"><button type="button" data-go="signin">Back to sign in</button></p>
-      </section>
+            <h2 class="auth-page-title">Reset your password</h2>
 
+            <form id="auth-forgot-form" class="auth-form">
+              <div class="auth-field">
+                <label>Email Address</label>
+                <input id="forgot-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+              </div>
+              <button type="submit" class="auth-submit" id="btn-forgot-submit">Send Reset Link</button>
+            </form>
+
+            <div class="auth-mode-switch">
+              Remember your password? <a onclick="switchMode('login')">Sign in</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Message Container -->
+        <div id="auth-message" aria-live="polite"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<button class="theme-toggle" id="themeBtn" type="button">Switch theme</button>
+  <!-- Particle animation script -->
+  <script>
+    // Create animated particles
+    function createParticles() {
+      const field = document.getElementById('particleField');
+      const particleCount = 40;
 
-<script src="./auth.js"></script>
-<script>
-(function(){
-  // panel switching
-  document.querySelectorAll('[data-go]').forEach(function(b){
-    b.addEventListener('click', function(){
-      var target = b.getAttribute('data-go');
-      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('is-on'); });
-      var targetPanel = document.getElementById('panel-' + target);
-      if(targetPanel) {
-        targetPanel.classList.add('is-on');
-        var first = targetPanel.querySelector('input');
-        if(first) first.focus({preventScroll:true});
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.opacity = Math.random() * 0.4 + 0.1;
+        particle.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`;
+        field.appendChild(particle);
       }
-    });
-  });
 
-  // password visibility
-  document.querySelectorAll('.toggle-vis').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var input = document.getElementById(btn.getAttribute('data-for'));
-      if(!input) return;
-      var showing = input.type === 'text';
-      input.type = showing ? 'password' : 'text';
-      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-    });
-  });
+      // Add keyframe animation for particles
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.6; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
-  // password strength
-  window.updateStrength = function(val){
-    var bars = document.querySelectorAll('#strength i');
-    var score = 0;
-    if(val.length >= 8) score++;
-    if(/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-    if(/[0-9]/.test(val)) score++;
-    if(/[^A-Za-z0-9]/.test(val)) score++;
-    var colors = ['var(--crit)','var(--crit)','var(--high)','var(--fixed)','var(--fixed)'];
-    bars.forEach(function(bar, i){
-      bar.style.background = i < score ? colors[score] : 'var(--line)';
+    // Initialize particles on load
+    document.addEventListener('DOMContentLoaded', () => {
+      createParticles();
     });
-    var hint = document.getElementById('strength-hint');
-    var labels = ['Use a mix of letters, numbers, and symbols.','Weak','Okay','Good','Strong'];
-    if(hint) hint.textContent = val.length === 0 ? labels[0] : labels[score];
-  };
-
-  // theme toggle
-  var themeBtn = document.getElementById('themeBtn');
-  try {
-    var stored = localStorage.getItem('cr-theme');
-    if(stored) document.documentElement.setAttribute('data-theme', stored);
-  } catch(e){}
-  if(themeBtn){
-    themeBtn.addEventListener('click', function(){
-      var isLight = getComputedStyle(document.body).backgroundColor === 'rgb(251, 251, 248)';
-      var next = isLight ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      try { localStorage.setItem('cr-theme', next); } catch(e){}
-    });
-  }
-})();
-</script>
+  </script>
+  <script src="./auth.js"></script>
 </body>
+
 </html>

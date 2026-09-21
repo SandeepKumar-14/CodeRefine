@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 from groq import Groq
 from supabase import create_client, Client
 
+
 load_dotenv()
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
 app = FastAPI(title="Coderefine API", version="0.1.0")
 
@@ -442,7 +442,7 @@ def chat_vision(payload: ChatVisionRequest, user = Depends(get_current_user)) ->
 
     try:
         completion = client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
+            model="qwen/qwen3.6-27b",
             messages=messages,
         )
         reply = completion.choices[0].message.content
