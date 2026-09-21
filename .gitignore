@@ -1,5 +1,9 @@
-# Backend secrets
+# Backend secrets and environment files
+.env
 backend/.env
+*.env
+.env.*
+
 
 # Frontend local config (holds Supabase keys, API base, etc.)
 frontend/config.local.js

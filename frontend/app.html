@@ -1,20 +1,860 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="utf-8" />
   <title>Coderefine – AI Code Workbench</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css" />
   <script src="./config.js"></script>
   <!-- config.local.js is gitignored; when present locally it overrides config.js -->
-  <script>fetch('./config.local.js').then(r=>r.ok&&r.text()).then(t=>t&&new Function(t)()).catch(()=>{})</script>
+  <script>fetch('./config.local.js').then(r => r.ok && r.text()).then(t => t && new Function(t)()).catch(() => { })</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── DARK INK-SLATE THEME (CONSISTENT WITH LOGIN & INDEX) ── */
+    :root,
+    html,
+    html[data-theme="dark"],
+    html[data-theme="light"],
+    html[data-theme="nebula"] {
+      --bg: #0D1117 !important;
+      --bg-elevated: #151B23 !important;
+      --surface: #151B23 !important;
+      --surface-2: #1B222C !important;
+      --surface-3: #10151C !important;
+      --bg-glass: rgba(21, 27, 35, 0.94) !important;
+      --bg-overlay: rgba(13, 17, 23, 0.92) !important;
+      --line: #262E3A !important;
+      --border: #262E3A !important;
+      --border-bright: #364253 !important;
+      --ink: #E8EAED !important;
+      --ink-2: #9BA4B0 !important;
+      --ink-3: #6B7684 !important;
+      --fg: #E8EAED !important;
+      --fg-muted: #9BA4B0 !important;
+      --fg-dim: #6B7684 !important;
+      --accent: #6FA8FF !important;
+      --accent-soft: rgba(111, 168, 255, 0.12) !important;
+      --accent-glow: transparent !important;
+      --accent2: #6FA8FF !important;
+      --crit: #E05A4E !important;
+      --danger: #E05A4E !important;
+      --high: #E8A33D !important;
+      --warning: #E8A33D !important;
+      --med: #6FA8FF !important;
+      --fixed: #3FBF8F !important;
+      --success: #3FBF8F !important;
+      --teal: #3FBF8F !important;
+      --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+      --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+      --font-mono: 'JetBrains Mono', monospace !important;
+      --radius-xl: 10px !important;
+      --radius-lg: 8px !important;
+      --radius-md: 6px !important;
+      --radius: 6px !important;
+      color-scheme: dark !important;
+    }
+
+    body {
+      background: var(--bg) !important;
+      color: var(--fg) !important;
+      font-family: var(--font-body) !important;
+    }
+
+    body::before,
+    body::after {
+      display: none !important;
+    }
+
+    /* Typography font assignments: JetBrains Mono for code, labels, chips, and buttons */
+    button,
+    .btn,
+    .topbar-btn,
+    .refine-btn,
+    #btn-refine,
+    .sidebar-item-primary,
+    .filter-btn,
+    .card-btn-primary,
+    .card-btn-secondary,
+    .chat-btn-send,
+    .composer-send,
+    .composer-attach,
+    .ai-tab,
+    .panel-tab,
+    .editor-tab,
+    .select,
+    select,
+    label,
+    .ctrl-label,
+    .sidebar-label,
+    .sidebar-section-title,
+    .brand-mark,
+    .brand-badge,
+    .sidebar-badge,
+    .metric-chip,
+    .tag-critical,
+    .tag-high,
+    .tag-medium,
+    .tag-fixed,
+    .tag-success,
+    .badge-critical,
+    .badge-high,
+    .badge-medium,
+    .badge-fixed,
+    .badge-success,
+    .sb-item,
+    .run-panel-title,
+    .run-section-header,
+    .run-input-warning,
+    pre,
+    code,
+    textarea,
+    .CodeMirror {
+      font-family: var(--font-mono) !important;
+    }
+
+    /* Topbar */
+    .app-topbar {
+      background: #151B23 !important;
+      border-bottom: 1px solid var(--line) !important;
+      box-shadow: none !important;
+    }
+
+    .topbar-brand .brand-mark,
+    .brand-mark {
+      background: #1B222C !important;
+      background-image: none !important;
+      color: #E8EAED !important;
+      border: 1px solid var(--line) !important;
+      box-shadow: none !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 700 !important;
+      font-size: 11px !important;
+      letter-spacing: 0.04em !important;
+      border-radius: 6px !important;
+      padding: 4px 8px !important;
+      height: auto !important;
+      width: auto !important;
+      transform: none !important;
+    }
+
+    .topbar-brand .brand-mark:hover,
+    .brand-mark:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .topbar-brand .brand-mark::before,
+    .brand-mark::before {
+      display: none !important;
+      content: none !important;
+    }
+
+    .topbar-brand .brand-title {
+      font-family: var(--font-display) !important;
+      font-weight: 700 !important;
+      font-size: 15px !important;
+      letter-spacing: -0.02em !important;
+      color: var(--ink) !important;
+    }
+
+    .topbar-brand .brand-badge {
+      font-family: var(--font-mono) !important;
+      font-size: 11px !important;
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-3) !important;
+      border-radius: 5px !important;
+      padding: 3px 8px !important;
+      text-transform: uppercase !important;
+    }
+
+    .control-group .ctrl-label {
+      color: var(--ink-3) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 11px !important;
+    }
+
+    .control-group .select {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12px !important;
+    }
+
+    .control-group .select:focus {
+      border-color: var(--accent) !important;
+      outline: none !important;
+    }
+
+    .topbar-btn {
+      background: #151B23 !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+    }
+
+    .topbar-btn:hover {
+      background: #1B222C !important;
+      color: var(--ink) !important;
+      border-color: var(--border-bright) !important;
+    }
+
+    .topbar-btn-subtle {
+      background: transparent !important;
+      border: none !important;
+      color: var(--ink-2) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12px !important;
+    }
+
+    .topbar-btn-subtle:hover {
+      color: var(--ink) !important;
+      background: #1B222C !important;
+    }
+
+    .topbar-icon-btn,
+    #btn-sidebar-toggle {
+      background: transparent !important;
+      border: none !important;
+      color: var(--ink-2) !important;
+    }
+
+    .topbar-icon-btn:hover,
+    #btn-sidebar-toggle:hover {
+      color: var(--ink) !important;
+      background: #1B222C !important;
+    }
+
+    .topbar-divider {
+      background: var(--line) !important;
+    }
+
+    /* Primary CTA Button (Refine with AI) */
+    .refine-btn,
+    .btn-primary.refine-btn,
+    #btn-refine {
+      background: #E8EAED !important;
+      background-image: none !important;
+      color: #0D1117 !important;
+      border: 1px solid #E8EAED !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 600 !important;
+      box-shadow: none !important;
+      gap: 6px !important;
+      transform: none !important;
+      opacity: 1 !important;
+      transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease !important;
+    }
+
+    .refine-btn:hover,
+    .btn-primary.refine-btn:hover,
+    #btn-refine:hover {
+      background: #FFFFFF !important;
+      border-color: #FFFFFF !important;
+      color: #0D1117 !important;
+      box-shadow: none !important;
+      transform: none !important;
+      opacity: 0.95 !important;
+    }
+
+    .refine-btn::before,
+    .refine-btn::after,
+    #btn-refine::before,
+    #btn-refine::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .refine-btn svg,
+    #btn-refine svg {
+      color: #0D1117 !important;
+      fill: currentColor !important;
+    }
+
+    /* Left Sidebar */
+    .left-sidebar {
+      background: #0D1117 !important;
+      border-right: 1px solid var(--line) !important;
+      box-shadow: none !important;
+    }
+
+    .sidebar-section-title,
+    .sidebar-label {
+      color: var(--ink-3) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 11px !important;
+      letter-spacing: 0.06em !important;
+      text-transform: uppercase !important;
+    }
+
+    .sidebar-item-primary {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+      transition: background-color 0.15s ease, border-color 0.15s ease !important;
+    }
+
+    .sidebar-item-primary:hover {
+      background: #262E3A !important;
+      border-color: var(--border-bright) !important;
+      color: var(--ink) !important;
+    }
+
+    .sidebar-item {
+      color: var(--ink-2) !important;
+      border-radius: 6px !important;
+      font-family: var(--font-body) !important;
+      transition: background-color 0.15s ease, color 0.15s ease !important;
+    }
+
+    .sidebar-item:hover {
+      background: #1B222C !important;
+      color: var(--ink) !important;
+    }
+
+    .sidebar-item.active {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      font-weight: 600 !important;
+    }
+
+    .sidebar-item::before,
+    .sidebar-item::after,
+    .sidebar-item.active::before,
+    .sidebar-item.active::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .sidebar-item .badge,
+    .sidebar-badge {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-3) !important;
+      border-radius: 4px !important;
+      font-family: var(--font-mono) !important;
+      font-size: 10.5px !important;
+    }
+
+    .sidebar-badge-dot {
+      background: var(--accent) !important;
+      box-shadow: none !important;
+    }
+
+    .sidebar-profile {
+      border-top: 1px solid var(--line) !important;
+      background: transparent !important;
+    }
+
+    .sidebar-avatar {
+      background: #1B222C !important;
+      background-image: none !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-2) !important;
+      font-family: var(--font-mono) !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+    }
+
+    .sidebar-profile-name {
+      color: var(--ink) !important;
+      font-family: var(--font-body) !important;
+      font-weight: 600 !important;
+    }
+
+    .sidebar-profile-plan {
+      color: var(--ink-3) !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    /* Editor Pane & Tabs */
+    .app-body {
+      background: var(--bg) !important;
+    }
+
+    .editor-pane {
+      background: #0D1117 !important;
+      border-right: 1px solid var(--line) !important;
+    }
+
+    .editor-tabstrip {
+      background: #151B23 !important;
+      border-bottom: 1px solid var(--line) !important;
+    }
+
+    .editor-tab {
+      background: transparent !important;
+      color: var(--ink-3) !important;
+      border-right: 1px solid var(--line) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12.5px !important;
+    }
+
+    .editor-tab.active {
+      background: #0D1117 !important;
+      color: var(--ink) !important;
+      font-weight: 600 !important;
+      border-bottom-color: #0D1117 !important;
+    }
+
+    .editor-tab:hover:not(.active) {
+      background: #1B222C !important;
+      color: var(--ink-2) !important;
+    }
+
+    .add-tab-btn {
+      background: transparent !important;
+      border: none !important;
+      color: var(--ink-3) !important;
+    }
+
+    .add-tab-btn:hover {
+      color: var(--ink) !important;
+      background: #1B222C !important;
+    }
+
+    /* Metrics Strip */
+    .tabstrip-metrics,
+    .editor-metrics-strip,
+    .editor-toolbar {
+      background: #151B23 !important;
+      border-bottom: 1px solid var(--line) !important;
+      padding: 6px 14px !important;
+    }
+
+    .metric-chip {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-2) !important;
+      border-radius: 4px !important;
+      font-family: var(--font-mono) !important;
+      font-size: 11.5px !important;
+    }
+
+    /* CodeMirror Dark Ink Overrides */
+    .CodeMirror {
+      background: #0D1117 !important;
+      color: #E8EAED !important;
+      font-family: var(--font-mono) !important;
+      font-size: 13.5px !important;
+      line-height: 1.6 !important;
+    }
+
+    .CodeMirror-gutters {
+      background: #0D1117 !important;
+      border-right: 1px solid var(--line) !important;
+    }
+
+    .CodeMirror-linenumber {
+      color: #6B7684 !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    .CodeMirror-cursor {
+      border-left: 2px solid #E8EAED !important;
+    }
+
+    .CodeMirror-selected {
+      background: rgba(111, 168, 255, 0.18) !important;
+    }
+
+    .cm-s-default .cm-keyword,
+    .cm-s-vs2015 .cm-keyword {
+      color: #6FA8FF !important;
+      font-weight: 600 !important;
+    }
+
+    .cm-s-default .cm-string,
+    .cm-s-vs2015 .cm-string {
+      color: #3FBF8F !important;
+    }
+
+    .cm-s-default .cm-comment,
+    .cm-s-vs2015 .cm-comment {
+      color: #6B7684 !important;
+      font-style: italic !important;
+    }
+
+    .cm-s-default .cm-number,
+    .cm-s-vs2015 .cm-number {
+      color: #E8A33D !important;
+    }
+
+    .cm-s-default .cm-def,
+    .cm-s-vs2015 .cm-def {
+      color: #E8EAED !important;
+      font-weight: 600 !important;
+    }
+
+    .cm-s-default .cm-variable,
+    .cm-s-vs2015 .cm-variable {
+      color: #E8EAED !important;
+    }
+
+    /* Run Output Panel */
+    .run-panel {
+      background: #151B23 !important;
+      border-top: 1px solid var(--line) !important;
+      box-shadow: none !important;
+    }
+
+    .run-panel-header {
+      background: #151B23 !important;
+      border-bottom: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    .run-panel-close {
+      color: var(--ink-3) !important;
+    }
+
+    .run-panel-close:hover {
+      color: var(--ink) !important;
+      background: #1B222C !important;
+    }
+
+    .run-panel-body,
+    .run-input-section,
+    .run-output-section {
+      background: #151B23 !important;
+    }
+
+    .run-input-section {
+      border-right: 1px solid var(--line) !important;
+    }
+
+    .run-section-header {
+      color: var(--ink-2) !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    .run-input-warning {
+      background: rgba(232, 163, 61, 0.12) !important;
+      border: 1px solid rgba(232, 163, 61, 0.28) !important;
+      color: #E8A33D !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    #run-input {
+      background: #0D1117 !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 6px !important;
+      color: var(--ink) !important;
+      font-family: var(--font-mono) !important;
+      box-shadow: none !important;
+    }
+
+    #run-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: none !important;
+    }
+
+    #run-output {
+      background: #0D1117 !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 6px !important;
+      color: var(--ink) !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    #run-output.error {
+      color: var(--crit) !important;
+      background: rgba(224, 90, 78, 0.08) !important;
+      border-color: rgba(224, 90, 78, 0.3) !important;
+    }
+
+    /* Resize Handle */
+    .resize-handle {
+      background: #151B23 !important;
+      border-left: 1px solid var(--line) !important;
+      border-right: 1px solid var(--line) !important;
+    }
+
+    .resize-collapse-btn {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-2) !important;
+    }
+
+    .resize-collapse-btn:hover {
+      background: #262E3A !important;
+      color: var(--ink) !important;
+    }
+
+    /* Right Side Assistant / Findings Panel */
+    .ai-panel,
+    .right-sidebar {
+      background: #151B23 !important;
+      border-left: 1px solid var(--line) !important;
+      box-shadow: none !important;
+    }
+
+    .ai-panel-header,
+    .ai-panel-tabstrip,
+    .panel-tabs {
+      background: #151B23 !important;
+      border-bottom: 1px solid var(--line) !important;
+    }
+
+    .ai-tab,
+    .panel-tab {
+      color: var(--ink-3) !important;
+      border-bottom: 2px solid transparent !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 500 !important;
+      font-size: 12px !important;
+    }
+
+    .ai-tab:hover,
+    .panel-tab:hover {
+      color: var(--ink) !important;
+    }
+
+    .ai-tab.active,
+    .panel-tab.active {
+      color: var(--ink) !important;
+      border-bottom: 2px solid #E8EAED !important;
+      font-weight: 600 !important;
+    }
+
+    /* Cards in Right Panel */
+    .finding-card,
+    .insight-card,
+    .suggestion-card {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      color: var(--ink) !important;
+      padding: 14px !important;
+    }
+
+    /* Tag badges & Severity chips */
+    .tag-critical,
+    .badge-critical,
+    .filter-critical {
+      background: rgba(224, 90, 78, 0.12) !important;
+      color: #E05A4E !important;
+      border: 1px solid rgba(224, 90, 78, 0.28) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 10.5px !important;
+      font-weight: 600 !important;
+      border-radius: 4px !important;
+      padding: 2px 6px !important;
+    }
+
+    .tag-high,
+    .badge-high,
+    .filter-high {
+      background: rgba(232, 163, 61, 0.12) !important;
+      color: #E8A33D !important;
+      border: 1px solid rgba(232, 163, 61, 0.28) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 10.5px !important;
+      font-weight: 600 !important;
+      border-radius: 4px !important;
+      padding: 2px 6px !important;
+    }
+
+    .tag-medium,
+    .badge-medium,
+    .filter-low,
+    .filter-medium {
+      background: rgba(111, 168, 255, 0.12) !important;
+      color: #6FA8FF !important;
+      border: 1px solid rgba(111, 168, 255, 0.28) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 10.5px !important;
+      font-weight: 600 !important;
+      border-radius: 4px !important;
+      padding: 2px 6px !important;
+    }
+
+    .tag-fixed,
+    .tag-success,
+    .badge-fixed,
+    .badge-success {
+      background: rgba(63, 191, 143, 0.12) !important;
+      color: #3FBF8F !important;
+      border: 1px solid rgba(63, 191, 143, 0.28) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 10.5px !important;
+      font-weight: 600 !important;
+      border-radius: 4px !important;
+      padding: 2px 6px !important;
+    }
+
+    /* Action buttons in cards */
+    .btn-apply-fix,
+    .card-btn-primary {
+      background: #E8EAED !important;
+      color: #0D1117 !important;
+      border: 1px solid #E8EAED !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 600 !important;
+      font-size: 12px !important;
+    }
+
+    .btn-apply-fix:hover,
+    .card-btn-primary:hover {
+      background: #FFFFFF !important;
+      border-color: #FFFFFF !important;
+    }
+
+    .btn-explain,
+    .card-btn-secondary {
+      background: #151B23 !important;
+      color: var(--ink) !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12px !important;
+    }
+
+    .btn-explain:hover,
+    .card-btn-secondary:hover {
+      background: #1B222C !important;
+      border-color: var(--border-bright) !important;
+    }
+
+    /* Chat Messages & Composer */
+    .chat-welcome {
+      color: var(--ink-2) !important;
+    }
+
+    .chat-welcome-icon {
+      color: var(--accent) !important;
+    }
+
+    .chat-msg-user {
+      background: #1B222C !important;
+      color: var(--ink) !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+    }
+
+    .chat-msg-assistant {
+      background: #151B23 !important;
+      color: var(--ink) !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+    }
+
+    .chat-composer {
+      background: #151B23 !important;
+      border-top: 1px solid var(--line) !important;
+    }
+
+    .chat-input-wrap {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+    }
+
+    .chat-input,
+    #chat-input {
+      background: transparent !important;
+      color: var(--ink) !important;
+      font-family: var(--font-body) !important;
+    }
+
+    .chat-btn-send,
+    #chat-send-btn,
+    .composer-send {
+      background: #E8EAED !important;
+      color: #0D1117 !important;
+      border: none !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+      font-weight: 600 !important;
+    }
+
+    .chat-btn-send:hover,
+    #chat-send-btn:hover,
+    .composer-send:hover {
+      background: #FFFFFF !important;
+    }
+
+    .composer-attach,
+    #chat-attach-btn {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-2) !important;
+      border-radius: 6px !important;
+    }
+
+    .composer-attach:hover,
+    #chat-attach-btn:hover {
+      background: #262E3A !important;
+      color: var(--ink) !important;
+    }
+
+    .chat-attachment-preview {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink-2) !important;
+      border-radius: 6px !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    /* Insights tab elements */
+    .insights-empty {
+      color: var(--ink-3) !important;
+    }
+
+    .insights-summary {
+      background: #1B222C !important;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+    }
+
+    /* Statusbar */
+    .app-statusbar {
+      background: #151B23 !important;
+      border-top: 1px solid var(--line) !important;
+      color: var(--ink-3) !important;
+      font-family: var(--font-mono) !important;
+    }
+
+    .sb-item {
+      color: var(--ink-3) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 11px !important;
+    }
+
+    .sb-remote {
+      color: var(--ink-2) !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -101,7 +941,7 @@
               <path
                 d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
             </svg>
-            Refine with AI
+            Enhance
           </button>
         </div>
 
@@ -298,7 +1138,7 @@
 
           <!-- Monaco editor -->
           <div id="editor-container" class="monaco-editor-wrap"></div>
-          
+
           <!-- Run Output Panel -->
           <div id="run-panel" class="run-panel" style="display: none;">
             <div class="run-panel-header">
@@ -353,7 +1193,8 @@
         <!-- MIDDLE: Resize Handle -->
         <div class="resize-handle" id="ai-panel-resize-handle">
           <button class="resize-collapse-btn" id="ai-panel-collapse-btn" title="Toggle Panel">
-            <svg id="collapse-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg id="collapse-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
@@ -406,11 +1247,12 @@
             <form id="chat-form" class="chat-composer">
               <!-- Hidden file input -->
               <input type="file" id="chat-file-input" accept=".txt,.pdf,.docx,.jpg,.jpeg,.png" style="display:none;" />
-              
+
               <!-- Preview chip for attached file -->
               <div id="chat-attachment-preview" class="chat-attachment-preview" style="display:none;">
                 <img id="chat-attachment-img" class="chat-attachment-img" style="display:none;" alt="thumbnail" />
-                <svg id="chat-attachment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg id="chat-attachment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
                   <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                   <polyline points="13 2 13 9 20 9"></polyline>
                 </svg>
@@ -424,19 +1266,22 @@
               </div>
 
               <div class="chat-input-row">
-                <button type="button" id="chat-attach-btn" class="btn btn-secondary composer-attach" title="Attach file (.txt, .pdf, .docx)">
+                <button type="button" id="chat-attach-btn" class="btn btn-secondary composer-attach"
+                  title="Attach file (.txt, .pdf, .docx)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                    <path
+                      d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                    </path>
                   </svg>
                 </button>
                 <textarea id="chat-input" placeholder="Ask about your code... (Ctrl+Enter to send)"></textarea>
                 <button type="submit" id="chat-send-btn" class="btn btn-primary composer-send">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
               </div>
             </form>
           </div>
