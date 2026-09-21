@@ -371,7 +371,11 @@ function initThemeSwitcher() {
       var c = pill.getAttribute("data-theme-choice");
       html.setAttribute("data-theme", c);
       localStorage.setItem("coderefine:theme", c);
-      if (window.monaco) monaco.editor.setTheme(c === "light" ? "vs" : "vs-dark");
+      if (window.applyCodeRefineMonaco) {
+        window.applyCodeRefineMonaco(c);
+      } else if (window.monaco) {
+        monaco.editor.setTheme(c === "light" ? "vs" : "vs-dark");
+      }
       document.querySelectorAll("[data-theme-choice]").forEach(function(p) {
         p.classList.toggle("theme-pill-active", p.getAttribute("data-theme-choice") === c);
       });
@@ -391,7 +395,6 @@ function initEditor() {
   editor = monaco.editor.create(container, {
     value:               "# Paste or type code here to refine it.\n\n",
     language:            languageToMonaco(currentLanguage),
-    theme:               localStorage.getItem("coderefine:theme") === "light" ? "vs" : "vs-dark",
     automaticLayout:     true,
     fontSize:            savedFontSize,
     fontFamily:          "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace",
@@ -410,6 +413,9 @@ function initEditor() {
     tabSize:             tabSize,
     scrollbar: { useShadows: false, verticalScrollbarSize: 5, horizontalScrollbarSize: 5 },
   });
+  if (window.applyCodeRefineMonaco) {
+    window.applyCodeRefineMonaco(document.documentElement.dataset.theme || document.documentElement.getAttribute("data-theme") || "light");
+  }
   editor.onDidChangeModelContent(function() {
     updateMetrics();
     if (!isSwitchingTab) {
@@ -936,7 +942,11 @@ function openSettingsPanel() {
       var c = pill.getAttribute("data-theme-choice");
       document.documentElement.setAttribute("data-theme", c);
       localStorage.setItem("coderefine:theme", c);
-      if (window.monaco) monaco.editor.setTheme(c === "light" ? "vs" : "vs-dark");
+      if (window.applyCodeRefineMonaco) {
+        window.applyCodeRefineMonaco(c);
+      } else if (window.monaco) {
+        monaco.editor.setTheme(c === "light" ? "vs" : "vs-dark");
+      }
       document.querySelectorAll("[data-theme-choice]").forEach(function(p) {
         p.classList.toggle("theme-pill-active", p.getAttribute("data-theme-choice") === c);
       });
@@ -1058,7 +1068,6 @@ function openDiffViewer() {
     var savedFontSize = parseInt(localStorage.getItem("coderefine:fontSize") || "13", 10);
     diffEditor = monaco.editor.createDiffEditor(diffContainer, {
       automaticLayout: true,
-      theme:           localStorage.getItem("coderefine:theme") === "light" ? "vs" : "vs-dark",
       readOnly:        true,
       minimap:         { enabled: false },
       fontFamily:      "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace",
@@ -1067,6 +1076,9 @@ function openDiffViewer() {
       renderSideBySide: true,
       scrollbar: { useShadows: false, verticalScrollbarSize: 5, horizontalScrollbarSize: 5 },
     });
+    if (window.applyCodeRefineMonaco) {
+      window.applyCodeRefineMonaco(document.documentElement.dataset.theme || document.documentElement.getAttribute("data-theme") || "light");
+    }
   }
   
   diffContainer.style.display = "block";

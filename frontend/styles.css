@@ -2814,8 +2814,8 @@ html[data-theme="nebula"] .brand-badge {
   display: flex;
   align-items: center;
   gap: 7px;
-  background: #16A34A !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
   border: 0 !important;
   padding: 9px 15px !important;
   border-radius: 6px !important;
@@ -2833,9 +2833,9 @@ html[data-theme="nebula"] .brand-badge {
 .refine-btn:hover,
 .btn-primary.refine-btn:hover,
 #btn-refine:hover {
-  opacity: 1 !important;
-  background: #15803D !important;
-  color: #ffffff !important;
+  opacity: 0.9 !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
   border: 0 !important;
   transform: none !important;
   box-shadow: none !important;
@@ -2843,7 +2843,7 @@ html[data-theme="nebula"] .brand-badge {
 
 .refine-btn:focus-visible,
 #btn-refine:focus-visible {
-  outline: 2px solid #DCFCE7 !important;
+  outline: 2px solid var(--accent) !important;
   outline-offset: 2px !important;
 }
 
@@ -2856,30 +2856,30 @@ html[data-theme="nebula"] .brand-badge {
 
 html[data-theme="light"] .refine-btn,
 html[data-theme="light"] #btn-refine {
-  background: #16A34A !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
 }
 
 html[data-theme="light"] .refine-btn:hover,
 html[data-theme="light"] #btn-refine:hover {
-  background: #15803D !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
 }
 
 html[data-theme="nebula"] .refine-btn,
 html[data-theme="nebula"] #btn-refine {
-  background: #16A34A !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
   box-shadow: none !important;
 }
 
 html[data-theme="nebula"] .refine-btn:hover,
 html[data-theme="nebula"] #btn-refine:hover {
-  background: #15803D !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: var(--on-ink) !important;
   transform: none !important;
   box-shadow: none !important;
-  opacity: 1 !important;
+  opacity: 0.9 !important;
 }
 
 

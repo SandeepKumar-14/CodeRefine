@@ -1,12 +1,28 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
+  <script>
+    /* Theme initialization before first paint to prevent flash of wrong theme */
+    (function () {
+      var saved = 'light';
+      try {
+        saved = localStorage.getItem('cr-theme') || localStorage.getItem('coderefine:theme') || 'light';
+      } catch (e) { }
+      document.documentElement.setAttribute('data-theme', saved);
+      document.documentElement.dataset.theme = saved;
+      try {
+        localStorage.setItem('cr-theme', saved);
+        localStorage.setItem('coderefine:theme', saved);
+      } catch (e) { }
+    })();
+  </script>
   <title>Coderefine – AI Code Workbench</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="./styles.css?v=7" />
+  <link rel="stylesheet" href="./styles.css?v=9" />
+  <link rel="stylesheet" href="./workbench-theme.css?v=1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -20,841 +36,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <style>
-    /* ── DARK INK-SLATE THEME (CONSISTENT WITH LOGIN & INDEX) ── */
-    :root,
-    html,
-    html[data-theme="dark"],
-    html[data-theme="light"],
-    html[data-theme="nebula"] {
-      --bg: #0D1117 !important;
-      --bg-elevated: #151B23 !important;
-      --surface: #151B23 !important;
-      --surface-2: #1B222C !important;
-      --surface-3: #10151C !important;
-      --bg-glass: rgba(21, 27, 35, 0.94) !important;
-      --bg-overlay: rgba(13, 17, 23, 0.92) !important;
-      --line: #262E3A !important;
-      --border: #262E3A !important;
-      --border-bright: #364253 !important;
-      --ink: #E8EAED !important;
-      --ink-2: #9BA4B0 !important;
-      --ink-3: #6B7684 !important;
-      --fg: #E8EAED !important;
-      --fg-muted: #9BA4B0 !important;
-      --fg-dim: #6B7684 !important;
-      --accent: #6FA8FF !important;
-      --accent-soft: rgba(111, 168, 255, 0.12) !important;
-      --accent-glow: transparent !important;
-      --accent2: #6FA8FF !important;
-      --crit: #E05A4E !important;
-      --danger: #E05A4E !important;
-      --high: #E8A33D !important;
-      --warning: #E8A33D !important;
-      --med: #6FA8FF !important;
-      --fixed: #3FBF8F !important;
-      --success: #3FBF8F !important;
-      --teal: #3FBF8F !important;
-      --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
-      --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
-      --font-mono: 'JetBrains Mono', monospace !important;
-      --radius-xl: 10px !important;
-      --radius-lg: 8px !important;
-      --radius-md: 6px !important;
-      --radius: 6px !important;
-      color-scheme: dark !important;
-    }
-
-    body {
-      background: var(--bg) !important;
-      color: var(--fg) !important;
-      font-family: var(--font-body) !important;
-    }
-
-    body::before,
-    body::after {
-      display: none !important;
-    }
-
-    /* Typography font assignments: JetBrains Mono for code, labels, chips, and buttons */
-    button,
-    .btn,
-    .topbar-btn,
-    .refine-btn,
-    #btn-refine,
-    .sidebar-item-primary,
-    .filter-btn,
-    .card-btn-primary,
-    .card-btn-secondary,
-    .chat-btn-send,
-    .composer-send,
-    .composer-attach,
-    .ai-tab,
-    .panel-tab,
-    .editor-tab,
-    .select,
-    select,
-    label,
-    .ctrl-label,
-    .sidebar-label,
-    .sidebar-section-title,
-    .brand-mark,
-    .brand-badge,
-    .sidebar-badge,
-    .metric-chip,
-    .tag-critical,
-    .tag-high,
-    .tag-medium,
-    .tag-fixed,
-    .tag-success,
-    .badge-critical,
-    .badge-high,
-    .badge-medium,
-    .badge-fixed,
-    .badge-success,
-    .sb-item,
-    .run-panel-title,
-    .run-section-header,
-    .run-input-warning,
-    pre,
-    code,
-    textarea,
-    .CodeMirror {
-      font-family: var(--font-mono) !important;
-    }
-
-    /* Topbar */
-    .app-topbar {
-      background: #151B23 !important;
-      border-bottom: 1px solid var(--line) !important;
-      box-shadow: none !important;
-    }
-
-    .topbar-brand .brand-mark,
-    .brand-mark {
-      background: #1B222C !important;
-      background-image: none !important;
-      color: #E8EAED !important;
-      border: 1px solid var(--line) !important;
-      box-shadow: none !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 700 !important;
-      font-size: 11px !important;
-      letter-spacing: 0.04em !important;
-      border-radius: 6px !important;
-      padding: 4px 8px !important;
-      height: auto !important;
-      width: auto !important;
-      transform: none !important;
-    }
-
-    .topbar-brand .brand-mark:hover,
-    .brand-mark:hover {
-      transform: none !important;
-      box-shadow: none !important;
-    }
-
-    .topbar-brand .brand-mark::before,
-    .brand-mark::before {
-      display: none !important;
-      content: none !important;
-    }
-
-    .topbar-brand .brand-title {
-      font-family: var(--font-display) !important;
-      font-weight: 700 !important;
-      font-size: 15px !important;
-      letter-spacing: -0.02em !important;
-      color: var(--ink) !important;
-    }
-
-    .topbar-brand .brand-badge {
-      font-family: var(--font-mono) !important;
-      font-size: 11px !important;
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-3) !important;
-      border-radius: 5px !important;
-      padding: 3px 8px !important;
-      text-transform: uppercase !important;
-    }
-
-    .control-group .ctrl-label {
-      color: var(--ink-3) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 11px !important;
-    }
-
-    .control-group .select {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-      border-radius: 6px !important;
-      box-shadow: none !important;
-      font-family: var(--font-mono) !important;
-      font-size: 12px !important;
-    }
-
-    .control-group .select:focus {
-      border-color: var(--accent) !important;
-      outline: none !important;
-    }
-
-    .topbar-btn {
-      background: #151B23 !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-      border-radius: 6px !important;
-      box-shadow: none !important;
-      font-family: var(--font-mono) !important;
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
-    }
-
-    .topbar-btn:hover {
-      background: #1B222C !important;
-      color: var(--ink) !important;
-      border-color: var(--border-bright) !important;
-    }
-
-    .topbar-btn-subtle {
-      background: transparent !important;
-      border: none !important;
-      color: var(--ink-2) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 12px !important;
-    }
-
-    .topbar-btn-subtle:hover {
-      color: var(--ink) !important;
-      background: #1B222C !important;
-    }
-
-    .topbar-icon-btn,
-    #btn-sidebar-toggle {
-      background: transparent !important;
-      border: none !important;
-      color: var(--ink-2) !important;
-    }
-
-    .topbar-icon-btn:hover,
-    #btn-sidebar-toggle:hover {
-      color: var(--ink) !important;
-      background: #1B222C !important;
-    }
-
-    .topbar-divider {
-      background: var(--line) !important;
-    }
-
-    /* Primary CTA Button (Refine with AI) */
-    .refine-btn,
-    .btn-primary.refine-btn,
-    #btn-refine {
-      background: #E8EAED !important;
-      background-image: none !important;
-      color: #0D1117 !important;
-      border: 1px solid #E8EAED !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 600 !important;
-      box-shadow: none !important;
-      gap: 6px !important;
-      transform: none !important;
-      opacity: 1 !important;
-      transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease !important;
-    }
-
-    .refine-btn:hover,
-    .btn-primary.refine-btn:hover,
-    #btn-refine:hover {
-      background: #FFFFFF !important;
-      border-color: #FFFFFF !important;
-      color: #0D1117 !important;
-      box-shadow: none !important;
-      transform: none !important;
-      opacity: 0.95 !important;
-    }
-
-    .refine-btn::before,
-    .refine-btn::after,
-    #btn-refine::before,
-    #btn-refine::after {
-      display: none !important;
-      content: none !important;
-    }
-
-    .refine-btn svg,
-    #btn-refine svg {
-      color: #0D1117 !important;
-      fill: currentColor !important;
-    }
-
-    /* Left Sidebar */
-    .left-sidebar {
-      background: #0D1117 !important;
-      border-right: 1px solid var(--line) !important;
-      box-shadow: none !important;
-    }
-
-    .sidebar-section-title,
-    .sidebar-label {
-      color: var(--ink-3) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 11px !important;
-      letter-spacing: 0.06em !important;
-      text-transform: uppercase !important;
-    }
-
-    .sidebar-item-primary {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-      border-radius: 6px !important;
-      box-shadow: none !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 600 !important;
-      font-size: 13px !important;
-      transition: background-color 0.15s ease, border-color 0.15s ease !important;
-    }
-
-    .sidebar-item-primary:hover {
-      background: #262E3A !important;
-      border-color: var(--border-bright) !important;
-      color: var(--ink) !important;
-    }
-
-    .sidebar-item {
-      color: var(--ink-2) !important;
-      border-radius: 6px !important;
-      font-family: var(--font-body) !important;
-      transition: background-color 0.15s ease, color 0.15s ease !important;
-    }
-
-    .sidebar-item:hover {
-      background: #1B222C !important;
-      color: var(--ink) !important;
-    }
-
-    .sidebar-item.active {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-      font-weight: 600 !important;
-    }
-
-    .sidebar-item::before,
-    .sidebar-item::after,
-    .sidebar-item.active::before,
-    .sidebar-item.active::after {
-      display: none !important;
-      content: none !important;
-    }
-
-    .sidebar-item .badge,
-    .sidebar-badge {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-3) !important;
-      border-radius: 4px !important;
-      font-family: var(--font-mono) !important;
-      font-size: 10.5px !important;
-    }
-
-    .sidebar-badge-dot {
-      background: var(--accent) !important;
-      box-shadow: none !important;
-    }
-
-    .sidebar-profile {
-      border-top: 1px solid var(--line) !important;
-      background: transparent !important;
-    }
-
-    .sidebar-avatar {
-      background: #1B222C !important;
-      background-image: none !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-2) !important;
-      font-family: var(--font-mono) !important;
-      border-radius: 6px !important;
-      box-shadow: none !important;
-    }
-
-    .sidebar-profile-name {
-      color: var(--ink) !important;
-      font-family: var(--font-body) !important;
-      font-weight: 600 !important;
-    }
-
-    .sidebar-profile-plan {
-      color: var(--ink-3) !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    /* Editor Pane & Tabs */
-    .app-body {
-      background: var(--bg) !important;
-    }
-
-    .editor-pane {
-      background: #0D1117 !important;
-      border-right: 1px solid var(--line) !important;
-    }
-
-    .editor-tabstrip {
-      background: #151B23 !important;
-      border-bottom: 1px solid var(--line) !important;
-    }
-
-    .editor-tab {
-      background: transparent !important;
-      color: var(--ink-3) !important;
-      border-right: 1px solid var(--line) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 12.5px !important;
-    }
-
-    .editor-tab.active {
-      background: #0D1117 !important;
-      color: var(--ink) !important;
-      font-weight: 600 !important;
-      border-bottom-color: #0D1117 !important;
-    }
-
-    .editor-tab:hover:not(.active) {
-      background: #1B222C !important;
-      color: var(--ink-2) !important;
-    }
-
-    .add-tab-btn {
-      background: transparent !important;
-      border: none !important;
-      color: var(--ink-3) !important;
-    }
-
-    .add-tab-btn:hover {
-      color: var(--ink) !important;
-      background: #1B222C !important;
-    }
-
-    /* Metrics Strip */
-    .tabstrip-metrics,
-    .editor-metrics-strip,
-    .editor-toolbar {
-      background: #151B23 !important;
-      border-bottom: 1px solid var(--line) !important;
-      padding: 6px 14px !important;
-    }
-
-    .metric-chip {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-2) !important;
-      border-radius: 4px !important;
-      font-family: var(--font-mono) !important;
-      font-size: 11.5px !important;
-    }
-
-    /* CodeMirror Dark Ink Overrides */
-    .CodeMirror {
-      background: #0D1117 !important;
-      color: #E8EAED !important;
-      font-family: var(--font-mono) !important;
-      font-size: 13.5px !important;
-      line-height: 1.6 !important;
-    }
-
-    .CodeMirror-gutters {
-      background: #0D1117 !important;
-      border-right: 1px solid var(--line) !important;
-    }
-
-    .CodeMirror-linenumber {
-      color: #6B7684 !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    .CodeMirror-cursor {
-      border-left: 2px solid #E8EAED !important;
-    }
-
-    .CodeMirror-selected {
-      background: rgba(111, 168, 255, 0.18) !important;
-    }
-
-    .cm-s-default .cm-keyword,
-    .cm-s-vs2015 .cm-keyword {
-      color: #6FA8FF !important;
-      font-weight: 600 !important;
-    }
-
-    .cm-s-default .cm-string,
-    .cm-s-vs2015 .cm-string {
-      color: #3FBF8F !important;
-    }
-
-    .cm-s-default .cm-comment,
-    .cm-s-vs2015 .cm-comment {
-      color: #6B7684 !important;
-      font-style: italic !important;
-    }
-
-    .cm-s-default .cm-number,
-    .cm-s-vs2015 .cm-number {
-      color: #E8A33D !important;
-    }
-
-    .cm-s-default .cm-def,
-    .cm-s-vs2015 .cm-def {
-      color: #E8EAED !important;
-      font-weight: 600 !important;
-    }
-
-    .cm-s-default .cm-variable,
-    .cm-s-vs2015 .cm-variable {
-      color: #E8EAED !important;
-    }
-
-    /* Run Output Panel */
-    .run-panel {
-      background: #151B23 !important;
-      border-top: 1px solid var(--line) !important;
-      box-shadow: none !important;
-    }
-
-    .run-panel-header {
-      background: #151B23 !important;
-      border-bottom: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    .run-panel-close {
-      color: var(--ink-3) !important;
-    }
-
-    .run-panel-close:hover {
-      color: var(--ink) !important;
-      background: #1B222C !important;
-    }
-
-    .run-panel-body,
-    .run-input-section,
-    .run-output-section {
-      background: #151B23 !important;
-    }
-
-    .run-input-section {
-      border-right: 1px solid var(--line) !important;
-    }
-
-    .run-section-header {
-      color: var(--ink-2) !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    .run-input-warning {
-      background: rgba(232, 163, 61, 0.12) !important;
-      border: 1px solid rgba(232, 163, 61, 0.28) !important;
-      color: #E8A33D !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    #run-input {
-      background: #0D1117 !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 6px !important;
-      color: var(--ink) !important;
-      font-family: var(--font-mono) !important;
-      box-shadow: none !important;
-    }
-
-    #run-input:focus {
-      border-color: var(--accent) !important;
-      box-shadow: none !important;
-    }
-
-    #run-output {
-      background: #0D1117 !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 6px !important;
-      color: var(--ink) !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    #run-output.error {
-      color: var(--crit) !important;
-      background: rgba(224, 90, 78, 0.08) !important;
-      border-color: rgba(224, 90, 78, 0.3) !important;
-    }
-
-    /* Resize Handle */
-    .resize-handle {
-      background: #151B23 !important;
-      border-left: 1px solid var(--line) !important;
-      border-right: 1px solid var(--line) !important;
-    }
-
-    .resize-collapse-btn {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-2) !important;
-    }
-
-    .resize-collapse-btn:hover {
-      background: #262E3A !important;
-      color: var(--ink) !important;
-    }
-
-    /* Right Side Assistant / Findings Panel */
-    .ai-panel,
-    .right-sidebar {
-      background: #151B23 !important;
-      border-left: 1px solid var(--line) !important;
-      box-shadow: none !important;
-    }
-
-    .ai-panel-header,
-    .ai-panel-tabstrip,
-    .panel-tabs {
-      background: #151B23 !important;
-      border-bottom: 1px solid var(--line) !important;
-    }
-
-    .ai-tab,
-    .panel-tab {
-      color: var(--ink-3) !important;
-      border-bottom: 2px solid transparent !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 500 !important;
-      font-size: 12px !important;
-    }
-
-    .ai-tab:hover,
-    .panel-tab:hover {
-      color: var(--ink) !important;
-    }
-
-    .ai-tab.active,
-    .panel-tab.active {
-      color: var(--ink) !important;
-      border-bottom: 2px solid #E8EAED !important;
-      font-weight: 600 !important;
-    }
-
-    /* Cards in Right Panel */
-    .finding-card,
-    .insight-card,
-    .suggestion-card {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 8px !important;
-      box-shadow: none !important;
-      color: var(--ink) !important;
-      padding: 14px !important;
-    }
-
-    /* Tag badges & Severity chips */
-    .tag-critical,
-    .badge-critical,
-    .filter-critical {
-      background: rgba(224, 90, 78, 0.12) !important;
-      color: #E05A4E !important;
-      border: 1px solid rgba(224, 90, 78, 0.28) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 10.5px !important;
-      font-weight: 600 !important;
-      border-radius: 4px !important;
-      padding: 2px 6px !important;
-    }
-
-    .tag-high,
-    .badge-high,
-    .filter-high {
-      background: rgba(232, 163, 61, 0.12) !important;
-      color: #E8A33D !important;
-      border: 1px solid rgba(232, 163, 61, 0.28) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 10.5px !important;
-      font-weight: 600 !important;
-      border-radius: 4px !important;
-      padding: 2px 6px !important;
-    }
-
-    .tag-medium,
-    .badge-medium,
-    .filter-low,
-    .filter-medium {
-      background: rgba(111, 168, 255, 0.12) !important;
-      color: #6FA8FF !important;
-      border: 1px solid rgba(111, 168, 255, 0.28) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 10.5px !important;
-      font-weight: 600 !important;
-      border-radius: 4px !important;
-      padding: 2px 6px !important;
-    }
-
-    .tag-fixed,
-    .tag-success,
-    .badge-fixed,
-    .badge-success {
-      background: rgba(63, 191, 143, 0.12) !important;
-      color: #3FBF8F !important;
-      border: 1px solid rgba(63, 191, 143, 0.28) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 10.5px !important;
-      font-weight: 600 !important;
-      border-radius: 4px !important;
-      padding: 2px 6px !important;
-    }
-
-    /* Action buttons in cards */
-    .btn-apply-fix,
-    .card-btn-primary {
-      background: #E8EAED !important;
-      color: #0D1117 !important;
-      border: 1px solid #E8EAED !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 600 !important;
-      font-size: 12px !important;
-    }
-
-    .btn-apply-fix:hover,
-    .card-btn-primary:hover {
-      background: #FFFFFF !important;
-      border-color: #FFFFFF !important;
-    }
-
-    .btn-explain,
-    .card-btn-secondary {
-      background: #151B23 !important;
-      color: var(--ink) !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-      font-size: 12px !important;
-    }
-
-    .btn-explain:hover,
-    .card-btn-secondary:hover {
-      background: #1B222C !important;
-      border-color: var(--border-bright) !important;
-    }
-
-    /* Chat Messages & Composer */
-    .chat-welcome {
-      color: var(--ink-2) !important;
-    }
-
-    .chat-welcome-icon {
-      color: var(--accent) !important;
-    }
-
-    .chat-msg-user {
-      background: #1B222C !important;
-      color: var(--ink) !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 8px !important;
-    }
-
-    .chat-msg-assistant {
-      background: #151B23 !important;
-      color: var(--ink) !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 8px !important;
-    }
-
-    .chat-composer {
-      background: #151B23 !important;
-      border-top: 1px solid var(--line) !important;
-    }
-
-    .chat-input-wrap {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      border-radius: 8px !important;
-    }
-
-    .chat-input,
-    #chat-input {
-      background: transparent !important;
-      color: var(--ink) !important;
-      font-family: var(--font-body) !important;
-    }
-
-    .chat-btn-send,
-    #chat-send-btn,
-    .composer-send {
-      background: #E8EAED !important;
-      color: #0D1117 !important;
-      border: none !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-      font-weight: 600 !important;
-    }
-
-    .chat-btn-send:hover,
-    #chat-send-btn:hover,
-    .composer-send:hover {
-      background: #FFFFFF !important;
-    }
-
-    .composer-attach,
-    #chat-attach-btn {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-2) !important;
-      border-radius: 6px !important;
-    }
-
-    .composer-attach:hover,
-    #chat-attach-btn:hover {
-      background: #262E3A !important;
-      color: var(--ink) !important;
-    }
-
-    .chat-attachment-preview {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink-2) !important;
-      border-radius: 6px !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    /* Insights tab elements */
-    .insights-empty {
-      color: var(--ink-3) !important;
-    }
-
-    .insights-summary {
-      background: #1B222C !important;
-      border: 1px solid var(--line) !important;
-      color: var(--ink) !important;
-    }
-
-    /* Statusbar */
-    .app-statusbar {
-      background: #151B23 !important;
-      border-top: 1px solid var(--line) !important;
-      color: var(--ink-3) !important;
-      font-family: var(--font-mono) !important;
-    }
-
-    .sb-item {
-      color: var(--ink-3) !important;
-      font-family: var(--font-mono) !important;
-      font-size: 11px !important;
-    }
-
-    .sb-remote {
-      color: var(--ink-2) !important;
-    }
-  </style>
 </head>
 
 <body>
@@ -872,9 +53,9 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <div class="brand-mark brand-text">ERROR FREE</div>
-        <span class="brand-title">Coderefine</span>
-        <span class="brand-badge">AI Workbench</span>
+        <div class="brand-mark brand-logo">{}</div>
+        <span class="brand-title">CodeRefine</span>
+        <span class="brand-badge">AI WORKBENCH</span>
       </div>
 
       <div class="topbar-controls">
@@ -895,6 +76,7 @@
         <div class="control-group">
           <label class="ctrl-label">Objective</label>
           <select id="goal-select" class="select" style="min-width:160px;">
+            <option value="Security review" selected>Security review</option>
             <option value="Improve readability, performance, and structure">General Polish</option>
             <option value="Optimize for speed and algorithmic performance">Optimize Performance</option>
             <option value="Make the code more concise and idiomatic">Make Idiomatic</option>
@@ -941,7 +123,7 @@
               <path
                 d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
             </svg>
-            Enhance
+            Refine with AI
           </button>
         </div>
 
@@ -1090,12 +272,13 @@
               <span class="sidebar-profile-plan">Free Plan</span>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              style="margin-left:auto; flex-shrink:0; color:var(--fg-dim);">
+              style="margin-left:auto; flex-shrink:0; color:var(--ink-3);">
               <circle cx="12" cy="12" r="1" />
               <circle cx="19" cy="12" r="1" />
               <circle cx="5" cy="12" r="1" />
             </svg>
           </div>
+          <div class="sidebar-version">v1.0.0 · CodeRefine</div>
         </div>
 
       </aside>
@@ -1206,20 +389,20 @@
           <!-- Panel header with tabs -->
           <div class="ai-panel-header">
             <div class="ai-tabs">
+              <button class="ai-tab" data-panel="insights">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg>
+                Findings
+              </button>
               <button class="ai-tab active" data-panel="assistant">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M8 12h4l2-4" />
                   <circle cx="12" cy="12" r="1" fill="currentColor" />
                 </svg>
-                Assistant
-              </button>
-              <button class="ai-tab" data-panel="insights">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                  <polyline points="17 6 23 6 23 12" />
-                </svg>
-                Insights
+                Chat
               </button>
               <button id="btn-diff" class="ai-tab">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1340,7 +523,71 @@
     <button class="theme-pill" data-theme-choice="nebula">Nebula</button>
   </div>
 
-  <script src="./app.js?v=5"></script>
+  <!-- Fixed Switch theme button like login -->
+  <button class="theme-fab" id="themeBtn" type="button" title="Switch theme">Switch theme</button>
+
+  <script>
+    /* Theme synchronizer & switcher script */
+    (function () {
+      function syncTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.dataset.theme = theme;
+        try {
+          localStorage.setItem('cr-theme', theme);
+          localStorage.setItem('coderefine:theme', theme);
+        } catch (e) { }
+        if (window.applyCodeRefineMonaco) {
+          window.applyCodeRefineMonaco(theme);
+        } else if (window.monaco && monaco.editor) {
+          monaco.editor.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
+        }
+        document.querySelectorAll('[data-theme-choice]').forEach(function (pill) {
+          pill.classList.toggle('theme-pill-active', pill.getAttribute('data-theme-choice') === theme);
+        });
+      }
+
+      var themeBtn = document.getElementById('themeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', function () {
+          var current = document.documentElement.getAttribute('data-theme') || 'light';
+          var cycle = ['light', 'dark', 'nebula'];
+          var next = cycle[(cycle.indexOf(current) + 1) % cycle.length] || 'light';
+          syncTheme(next);
+        });
+      }
+
+      document.addEventListener('click', function (e) {
+        var pill = e.target.closest('[data-theme-choice]');
+        if (pill) {
+          var choice = pill.getAttribute('data-theme-choice');
+          if (choice) {
+            syncTheme(choice);
+          }
+        }
+      });
+
+      var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+          if (m.attributeName === 'data-theme') {
+            var val = document.documentElement.getAttribute('data-theme');
+            if (val) {
+              try {
+                localStorage.setItem('cr-theme', val);
+                localStorage.setItem('coderefine:theme', val);
+              } catch (e) { }
+              if (window.applyCodeRefineMonaco) {
+                window.applyCodeRefineMonaco(val);
+              }
+            }
+          }
+        });
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    })();
+  </script>
+
+  <script src="./monaco-theme.js?v=1"></script>
+  <script src="./app.js?v=7"></script>
 </body>
 
 </html>
