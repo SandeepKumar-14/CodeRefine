@@ -1,0 +1,507 @@
+/* ==========================================================================
+   CodeRefine — workbench theme (UI only)
+   Load AFTER styles.css:  <link rel="stylesheet" href="./workbench-theme.css?v=1">
+   Delete the old inline <style> block in app.html (it forces dark with !important).
+   Themes: html[data-theme="light" | "dark" | "nebula"]
+   ========================================================================== */
+
+/* ── Tokens ────────────────────────────────────────────────────────────── */
+:root,
+html[data-theme="light"] {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --surface-2: #F1F0EB;
+  --line: #E4E2DA;
+  --line-strong: #CFCCC2;
+  --ink: #14171C;
+  --ink-2: #4B5260;
+  --ink-3: #8A8F98;
+  --on-ink: #FFFFFF;
+  --accent: #2F5FD0;
+
+  --crit: #C4402F;  --crit-bg: #FBE9E5;  --crit-line: #EFC3BB;
+  --high: #A8690F;  --high-bg: #FBF0DC;  --high-line: #EBD3A2;
+  --med:  #2F5FD0;  --med-bg:  #E7EEFB;  --med-line:  #C5D5F3;
+  --fixed:#1F8F5F;  --fixed-bg:#E2F3EB;  --fixed-line:#B7E0CC;
+
+  --font-ui: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius: 8px;
+  --radius-sm: 6px;
+  color-scheme: light;
+
+  /* Compatibility aliases */
+  --bg-elevated: var(--surface);
+  --border: var(--line);
+  --border-bright: var(--line-strong);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-2);
+  --fg-dim: var(--ink-3);
+  --font-display: var(--font-ui);
+  --font-body: var(--font-ui);
+  --overlay: color-mix(in srgb, var(--ink) 25%, transparent);
+  --shadow: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+html[data-theme="dark"] {
+  --bg: #0D1117;
+  --surface: #151B23;
+  --surface-2: #1B222C;
+  --line: #262E3A;
+  --line-strong: #364253;
+  --ink: #E8EAED;
+  --ink-2: #9BA4B0;
+  --ink-3: #6B7684;
+  --on-ink: #0D1117;
+  --accent: #6FA8FF;
+
+  --crit: #E05A4E;  --crit-bg: rgba(224,90,78,.12);  --crit-line: rgba(224,90,78,.32);
+  --high: #E8A33D;  --high-bg: rgba(232,163,61,.12); --high-line: rgba(232,163,61,.32);
+  --med:  #6FA8FF;  --med-bg:  rgba(111,168,255,.12);--med-line:  rgba(111,168,255,.32);
+  --fixed:#3FBF8F;  --fixed-bg:rgba(63,191,143,.12); --fixed-line:rgba(63,191,143,.32);
+  color-scheme: dark;
+
+  /* Compatibility aliases */
+  --bg-elevated: var(--surface);
+  --border: var(--line);
+  --border-bright: var(--line-strong);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-2);
+  --fg-dim: var(--ink-3);
+  --font-display: var(--font-ui);
+  --font-body: var(--font-ui);
+  --overlay: color-mix(in srgb, var(--bg) 80%, transparent);
+  --shadow: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+/* Nebula: same structure, deep indigo. Tweak freely. */
+html[data-theme="nebula"] {
+  --bg: #0F0C1D;
+  --surface: #171330;
+  --surface-2: #211B40;
+  --line: #2E2758;
+  --line-strong: #453B7E;
+  --ink: #ECE9FF;
+  --ink-2: #A9A3D1;
+  --ink-3: #766FA3;
+  --on-ink: #0F0C1D;
+  --accent: #9D8CFF;
+
+  --crit: #F0708A;  --crit-bg: rgba(240,112,138,.12);--crit-line: rgba(240,112,138,.32);
+  --high: #EDB25A;  --high-bg: rgba(237,178,90,.12); --high-line: rgba(237,178,90,.32);
+  --med:  #9D8CFF;  --med-bg:  rgba(157,140,255,.14);--med-line:  rgba(157,140,255,.34);
+  --fixed:#52D1A0;  --fixed-bg:rgba(82,209,160,.12); --fixed-line:rgba(82,209,160,.32);
+  color-scheme: dark;
+
+  /* Compatibility aliases */
+  --bg-elevated: var(--surface);
+  --border: var(--line);
+  --border-bright: var(--line-strong);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-2);
+  --fg-dim: var(--ink-3);
+  --font-display: var(--font-ui);
+  --font-body: var(--font-ui);
+  --overlay: color-mix(in srgb, var(--bg) 80%, transparent);
+  --shadow: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+html body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+html body::before, html body::after { display: none; }
+
+.app-shell { background: var(--bg); color: var(--ink); font-family: var(--font-ui); }
+.app-shell * { scrollbar-color: var(--line-strong) transparent; }
+.app-shell ::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+
+/* mono is for labels, chips, code — not for every button */
+.app-shell .ctrl-label,
+.app-shell .sidebar-label,
+.app-shell .brand-badge,
+.app-shell .metric-chip,
+.app-shell .sidebar-badge,
+.app-shell .sidebar-profile-plan,
+.app-shell .sb-item,
+.app-shell .run-section-header,
+.app-shell .run-panel-title,
+.app-shell pre,
+.app-shell code,
+.app-shell #run-input,
+.app-shell #run-output {
+  font-family: var(--font-mono);
+}
+
+/* ── Topbar ────────────────────────────────────────────────────────────── */
+.app-shell .app-topbar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+
+/* Brand: use the {} mark + wordmark markup */
+.app-shell .brand-mark {
+  background: var(--ink);
+  background-image: none;
+  color: var(--on-ink);
+  border: none;
+  box-shadow: none;
+  border-radius: var(--radius-sm);
+  transform: none;
+}
+.app-shell .brand-mark::before, .app-shell .brand-mark::after { content: none; display: none; }
+.app-shell .brand-mark.brand-text {            /* old text-only version */
+  font-family: var(--font-mono);
+  font-weight: 700; font-size: 12px;
+  padding: 5px 9px; width: auto; height: auto;
+}
+.app-shell .brand-mark.brand-logo {            /* new {} square mark */
+  width: 28px; height: 28px; padding: 0;
+  display: inline-grid; place-items: center;
+  font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+}
+.app-shell .brand-title {
+  font-family: var(--font-ui);
+  font-weight: 700; font-size: 16px; letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.app-shell .brand-badge {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+}
+
+.app-shell .ctrl-label {
+  color: var(--ink-3);
+  font-size: 11px; letter-spacing: .04em;
+}
+.app-shell .select,
+.app-shell select {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+.app-shell .select:focus,
+.app-shell select:focus { border-color: var(--accent); outline: none; }
+
+/* ghost buttons: Format / Save / Load / Run */
+.app-shell .topbar-btn {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  font-family: var(--font-ui);
+  font-size: 13px; font-weight: 500;
+  transition: background-color .15s, border-color .15s;
+}
+.app-shell .topbar-btn:hover { background: var(--surface-2); border-color: var(--line-strong); }
+.app-shell .topbar-btn-subtle { background: transparent; border-color: transparent; color: var(--ink-2); }
+.app-shell .topbar-btn-subtle:hover { background: var(--surface-2); color: var(--ink); }
+.app-shell .topbar-icon-btn { background: transparent; border: none; color: var(--ink-2); }
+.app-shell .topbar-icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.app-shell .topbar-divider { background: var(--line); }
+
+/* primary: Refine with AI */
+.app-shell .refine-btn,
+.app-shell #btn-refine {
+  background: var(--ink) !important;
+  background-image: none !important;
+  color: var(--on-ink) !important;
+  border: 1px solid var(--ink) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  transform: none !important;
+}
+.app-shell .refine-btn:hover,
+.app-shell #btn-refine:hover { opacity: .9 !important; background: var(--ink) !important; color: var(--on-ink) !important; box-shadow: none !important; transform: none !important; }
+.app-shell .refine-btn::before, .app-shell .refine-btn::after { content: none !important; display: none !important; }
+.app-shell .refine-btn svg { color: var(--on-ink) !important; }
+
+/* ── Left sidebar ──────────────────────────────────────────────────────── */
+.app-shell .left-sidebar {
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  box-shadow: none;
+}
+.app-shell .sidebar-label {
+  color: var(--ink-3);
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+}
+.app-shell .sidebar-divider { background: var(--line); }
+.app-shell .sidebar-item {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui); font-size: 14px;
+  box-shadow: none;
+}
+.app-shell .sidebar-item:hover { background: var(--surface-2); color: var(--ink); }
+.app-shell .sidebar-item.active { background: var(--surface-2); color: var(--ink); font-weight: 600; }
+.app-shell .sidebar-item::before, .app-shell .sidebar-item::after { content: none; display: none; }
+.app-shell .sidebar-item-primary {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+.app-shell .sidebar-item-primary:hover { background: var(--surface-2); border-color: var(--line-strong); }
+.app-shell .sidebar-badge {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  border-radius: 4px; font-size: 10.5px;
+}
+.app-shell .sidebar-badge-dot {
+  background: var(--fixed);
+  border: none; box-shadow: none;
+}
+.app-shell .sidebar-profile { border-top: 1px solid var(--line); background: transparent; }
+.app-shell .sidebar-avatar {
+  background: var(--surface-2);
+  background-image: none;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: 999px;
+  font-family: var(--font-mono); font-size: 11px;
+  box-shadow: none;
+}
+.app-shell .sidebar-profile-name { color: var(--ink); font-weight: 600; }
+.app-shell .sidebar-profile-plan { color: var(--ink-3); font-size: 11px; }
+
+/* ── Editor pane ───────────────────────────────────────────────────────── */
+.app-shell .app-body { background: var(--bg); }
+.app-shell .editor-pane { background: var(--surface); border-right: 1px solid var(--line); }
+.app-shell .editor-tabstrip { background: var(--bg); border-bottom: 1px solid var(--line); }
+.app-shell .editor-tab {
+  background: transparent; color: var(--ink-3);
+  border-right: 1px solid var(--line);
+  font-family: var(--font-ui); font-size: 13px;
+}
+.app-shell .editor-tab:hover:not(.active) { background: var(--surface-2); color: var(--ink-2); }
+.app-shell .editor-tab.active {
+  background: var(--surface); color: var(--ink); font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+.app-shell .add-tab-btn { background: transparent; border: none; color: var(--ink-3); }
+.app-shell .add-tab-btn:hover { background: var(--surface-2); color: var(--ink); }
+
+.app-shell .metric-chip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: 5px; font-size: 11px;
+}
+/* severity chips in the metric strip */
+.app-shell .metric-chip.chip-critical { color: var(--crit); border-color: var(--crit-line); background: var(--crit-bg); }
+.app-shell .metric-chip.chip-high     { color: var(--high); border-color: var(--high-line); background: var(--high-bg); }
+
+.app-shell .monaco-editor-wrap { background: var(--surface); }
+
+/* flagged lines in Monaco (use as className in deltaDecorations) */
+.cr-line-crit { background: var(--crit-bg) !important; border-left: 2px solid var(--crit); }
+.cr-line-high { background: var(--high-bg) !important; border-left: 2px solid var(--high); }
+
+/* ── Run panel ─────────────────────────────────────────────────────────── */
+.app-shell .run-panel { background: var(--bg); border-top: 1px solid var(--line); box-shadow: none; }
+.app-shell .run-panel-header { background: var(--bg); border-bottom: 1px solid var(--line); color: var(--ink); }
+.app-shell .run-panel-body,
+.app-shell .run-input-section,
+.app-shell .run-output-section { background: var(--bg); }
+.app-shell .run-input-section { border-right: 1px solid var(--line); }
+.app-shell .run-section-header { color: var(--ink-2); font-size: 11px; }
+.app-shell .run-panel-close { color: var(--ink-3); }
+.app-shell .run-panel-close:hover { color: var(--ink); background: var(--surface-2); }
+.app-shell #run-input,
+.app-shell #run-output {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  box-shadow: none;
+}
+.app-shell #run-input:focus { border-color: var(--accent); box-shadow: none; }
+.app-shell #run-output.error { color: var(--crit); background: var(--crit-bg); border-color: var(--crit-line); }
+.app-shell .run-input-warning {
+  background: var(--high-bg); border: 1px solid var(--high-line);
+  color: var(--high); border-radius: var(--radius-sm);
+}
+
+/* ── Resize handle ─────────────────────────────────────────────────────── */
+.app-shell .resize-handle { background: var(--bg); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.app-shell .resize-collapse-btn { background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); }
+.app-shell .resize-collapse-btn:hover { background: var(--surface-2); color: var(--ink); }
+
+/* ── Right panel ───────────────────────────────────────────────────────── */
+.app-shell .ai-panel { background: var(--bg); border-left: 1px solid var(--line); box-shadow: none; }
+.app-shell .ai-panel-header { background: var(--bg); border-bottom: 1px solid var(--line); }
+.app-shell .ai-tab {
+  background: transparent; color: var(--ink-3);
+  border: none; border-bottom: 2px solid transparent; border-radius: 0;
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 500;
+  box-shadow: none;
+}
+.app-shell .ai-tab:hover { color: var(--ink); }
+.app-shell .ai-tab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); background: transparent; }
+
+.app-shell .chat-welcome { color: var(--ink-2); }
+.app-shell .chat-welcome strong { color: var(--ink); }
+.app-shell .chat-welcome-icon {
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink); border-radius: var(--radius);
+}
+.app-shell .chat-msg-user {
+  background: var(--surface-2); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.app-shell .chat-msg-assistant {
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.app-shell .chat-composer { background: var(--bg); border-top: 1px solid var(--line); }
+.app-shell .chat-input-row {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.app-shell .chat-input-row:focus-within { border-color: var(--ink-3); }
+.app-shell #chat-input { background: transparent; color: var(--ink); font-family: var(--font-ui); border: none; box-shadow: none; }
+.app-shell #chat-input::placeholder { color: var(--ink-3); }
+.app-shell .composer-attach { background: transparent; border: none; color: var(--ink-3); box-shadow: none; }
+.app-shell .composer-attach:hover { color: var(--ink); background: var(--surface-2); }
+.app-shell .composer-send,
+.app-shell #chat-send-btn {
+  background: var(--ink) !important; background-image: none !important; color: var(--on-ink) !important;
+  border: none !important; border-radius: var(--radius-sm) !important; box-shadow: none !important;
+}
+.app-shell .composer-send:hover { opacity: .9; }
+.app-shell .chat-attachment-preview {
+  background: var(--surface-2); border: 1px solid var(--line);
+  color: var(--ink-2); border-radius: var(--radius-sm); font-family: var(--font-mono);
+}
+
+/* ── Findings / insights ───────────────────────────────────────────────── */
+.app-shell .insights-empty { color: var(--ink-3); }
+.app-shell .insights-summary {
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink); border-radius: var(--radius);
+}
+.app-shell .insights-list > li,
+.app-shell .finding-card,
+.app-shell .insight-card,
+.app-shell .suggestion-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: none;
+  color: var(--ink);
+}
+.app-shell .insights-list > li p,
+.app-shell .finding-card p { color: var(--ink-2); }
+
+/* severity filter chips */
+.app-shell .filter-btn {
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink-2); border-radius: 5px;
+  font-family: var(--font-mono); font-size: 11.5px; box-shadow: none;
+}
+.app-shell .filter-btn:hover { border-color: var(--line-strong); color: var(--ink); }
+.app-shell .filter-btn.active { background: var(--surface-2); color: var(--ink); border-color: var(--line-strong); }
+
+/* severity tags */
+.app-shell .tag-critical, .app-shell .badge-critical, .app-shell .severity-critical {
+  background: var(--crit-bg); color: var(--crit); border: 1px solid var(--crit-line);
+}
+.app-shell .tag-high, .app-shell .badge-high, .app-shell .severity-high {
+  background: var(--high-bg); color: var(--high); border: 1px solid var(--high-line);
+}
+.app-shell .tag-medium, .app-shell .tag-low, .app-shell .badge-medium, .app-shell .badge-low, .app-shell .severity-low {
+  background: var(--med-bg); color: var(--med); border: 1px solid var(--med-line);
+}
+.app-shell .tag-fixed, .app-shell .tag-success, .app-shell .badge-fixed, .app-shell .badge-success {
+  background: var(--fixed-bg); color: var(--fixed); border: 1px solid var(--fixed-line);
+}
+.app-shell .tag-critical, .app-shell .tag-high, .app-shell .tag-medium, .app-shell .tag-low,
+.app-shell .tag-fixed, .app-shell .tag-success,
+.app-shell .badge-critical, .app-shell .badge-high, .app-shell .badge-medium, .app-shell .badge-low,
+.app-shell .badge-fixed, .app-shell .badge-success,
+.app-shell .severity-badge {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  border-radius: 4px; padding: 2px 6px;
+}
+
+/* card actions */
+.app-shell .btn-apply-fix,
+.app-shell .card-btn-primary {
+  background: var(--ink) !important; color: var(--on-ink) !important; border: 1px solid var(--ink) !important;
+  border-radius: var(--radius-sm); font-family: var(--font-ui); font-weight: 600; font-size: 13px;
+}
+.app-shell .btn-apply-fix:hover, .app-shell .card-btn-primary:hover { opacity: .9; }
+.app-shell .btn-explain,
+.app-shell .card-btn-secondary {
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); font-family: var(--font-ui); font-size: 13px;
+}
+.app-shell .btn-explain:hover, .app-shell .card-btn-secondary:hover { background: var(--surface-2); border-color: var(--line-strong); }
+
+/* ── Statusbar ─────────────────────────────────────────────────────────── */
+.app-shell .app-statusbar {
+  background: var(--bg); border-top: 1px solid var(--line);
+  color: var(--ink-3); font-family: var(--font-mono);
+}
+.app-shell .sb-item { color: var(--ink-3); font-size: 11px; }
+.app-shell .sb-remote { color: var(--ink-2); }
+
+/* ── Switch theme (floating, same as login) ────────────────────────────── */
+.theme-fab,
+.theme-toggle {
+  position: fixed; right: 16px; bottom: 44px; z-index: 50;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font-family: var(--font-ui); font-size: 13px; cursor: pointer;
+}
+.theme-fab:hover,
+.theme-toggle:hover { background: var(--surface-2); }
+.theme-fab:focus-visible,
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Modals & Settings Theme Pills ─────────────────────────────────────── */
+.theme-pill {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.theme-pill:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.theme-pill.theme-pill-active {
+  background: var(--ink);
+  color: var(--on-ink);
+  border-color: var(--ink);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell * { transition: none !important; }
+}
