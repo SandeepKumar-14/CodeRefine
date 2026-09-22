@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="utf-8" />
@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./styles.css?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <!-- config.local.js is gitignored; when present locally it overrides config.js -->
@@ -24,71 +24,15 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow-x: hidden;
     }
 
     body {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+      background-color: #ffffff;
       min-height: 100vh;
       display: flex;
-      position: relative;
-      font-family: 'Sora', sans-serif;
-    }
-
-    /* Animated particle field */
-    .particle-field {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: radial-gradient(circle, rgba(100, 200, 255, 0.8), rgba(100, 200, 255, 0));
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    /* Glassmorphic orbs */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.25;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .orb-1 {
-      width: 400px;
-      height: 400px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      top: -200px;
-      right: -100px;
-      animation: float-slow 20s ease-in-out infinite;
-    }
-
-    .orb-2 {
-      width: 350px;
-      height: 350px;
-      background: linear-gradient(135deg, #06b6d4, #0891b2);
-      bottom: -100px;
-      left: -100px;
-      animation: float-slow 25s ease-in-out infinite reverse;
-    }
-
-    @keyframes float-slow {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(30px, -30px); }
-      50% { transform: translate(-20px, 20px); }
-      75% { transform: translate(20px, 10px); }
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #000000;
     }
 
     #auth-root {
@@ -97,118 +41,68 @@
       justify-content: center;
       min-height: 100vh;
       width: 100%;
-      position: relative;
-      z-index: 10;
       padding: 20px;
     }
 
     .auth-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
     }
 
     .auth-header {
       text-align: center;
-      margin-bottom: 50px;
-      animation: fade-in-down 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 40px;
     }
 
-    @keyframes fade-in-down {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .auth-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
     }
 
     .auth-logo {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 80px;
-      height: 80px;
-      border-radius: 24px;
-      margin: 0 auto 24px;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2));
-      border: 2px solid rgba(79, 70, 229, 0.4);
-      font-size: 36px;
-      font-weight: 800;
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      background: linear-gradient(135deg, #64b5f6, #9c27b0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: logo-pulse 3s ease-in-out infinite;
-    }
-
-    @keyframes logo-pulse {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 0 40px rgba(79, 70, 229, 0.5);
-        transform: scale(1.05);
-      }
+      width: 28px;
+      height: 28px;
+      background: #000000;
+      color: white;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      padding-bottom: 2px;
+      margin-right: 12px;
+      vertical-align: middle;
     }
 
     .auth-title {
       font-size: 28px;
       font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 8px;
-      letter-spacing: -0.02em;
+      color: #000000;
+      margin: 0;
+      letter-spacing: -0.04em;
     }
 
     .auth-subtitle {
-      font-size: 14px;
-      color: #cbd5e1;
-      letter-spacing: 0.3px;
+      font-size: 15px;
+      color: #666666;
     }
 
     .auth-card {
-      background: rgba(15, 20, 40, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(100, 200, 255, 0.15);
-      border-radius: 20px;
+      background: #ffffff;
+      border: 1px solid #eaeaea;
+      border-radius: 16px;
       padding: 40px;
-      animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .auth-card::before {
-      content: '';
-      position: absolute;
-      top: -1px;
-      left: -1px;
-      right: -1px;
-      bottom: -1px;
-      background: linear-gradient(135deg, rgba(100, 200, 255, 0.2), rgba(168, 85, 247, 0.1));
-      border-radius: 20px;
-      z-index: -1;
-    }
-
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
     }
 
     .auth-form {
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 20px;
     }
 
     .auth-field {
@@ -220,70 +114,45 @@
     .auth-field label {
       font-size: 13px;
       font-weight: 600;
-      color: #cbd5e1;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
+      color: #666666;
     }
 
     .auth-field input {
       padding: 12px 16px;
-      background: rgba(30, 35, 55, 0.7);
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      border-radius: 12px;
-      color: #ffffff;
-      font-size: 14px;
-      font-family: 'Sora', sans-serif;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      backdrop-filter: blur(10px);
+      background: #ffffff;
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+      color: #000000;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
     }
 
     .auth-field input::placeholder {
-      color: #64748b;
+      color: #999999;
     }
 
     .auth-field input:focus {
       outline: none;
-      border-color: #64b5f6;
-      box-shadow: 0 0 0 3px rgba(100, 200, 255, 0.1);
-      background: rgba(30, 35, 55, 0.9);
+      border-color: #000000;
     }
 
     .auth-submit {
-      padding: 13px 24px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      border: none;
-      border-radius: 12px;
+      padding: 14px 24px;
+      background: #111111;
+      border: 1px solid #111111;
+      border-radius: 8px;
       color: white;
-      font-weight: 700;
-      font-family: 'Sora', sans-serif;
-      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      font-size: 15px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s;
       margin-top: 8px;
-      position: relative;
-      overflow: hidden;
-      letter-spacing: 0.3px;
-    }
-
-    .auth-submit::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s;
     }
 
     .auth-submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 40px rgba(79, 70, 229, 0.5);
-    }
-
-    .auth-submit:hover:not(:disabled)::before {
-      left: 100%;
+      background: #333333;
     }
 
     .auth-submit:disabled {
@@ -295,28 +164,26 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
-      color: #cbd5e1;
+      font-size: 14px;
+      color: #666666;
     }
 
     .checkbox-group input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       cursor: pointer;
-      accent-color: #64b5f6;
+      accent-color: #000000;
     }
 
     .forgot-link {
-      font-size: 12px;
-      color: #64b5f6;
+      font-size: 13px;
+      color: #000000;
       text-decoration: none;
       cursor: pointer;
-      transition: color 0.3s ease;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .forgot-link:hover {
-      color: #a5d6ff;
       text-decoration: underline;
     }
 
@@ -325,8 +192,8 @@
       align-items: center;
       gap: 12px;
       margin: 28px 0;
-      color: #64748b;
-      font-size: 12px;
+      color: #999999;
+      font-size: 13px;
       font-weight: 500;
     }
 
@@ -335,13 +202,13 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(100, 200, 255, 0.2), transparent);
+      background: #eaeaea;
     }
 
     .auth-oauth-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 16px;
     }
 
     .auth-oauth-btn {
@@ -350,44 +217,37 @@
       justify-content: center;
       gap: 8px;
       padding: 12px 16px;
-      background: rgba(30, 35, 55, 0.5);
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      border-radius: 12px;
-      color: #cbd5e1;
-      font-weight: 600;
-      font-size: 13px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      color: #000000;
+      font-weight: 500;
+      font-size: 14px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      font-family: 'Sora', sans-serif;
-      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      font-family: inherit;
     }
 
     .auth-oauth-btn:hover {
-      background: rgba(100, 200, 255, 0.1);
-      border-color: #64b5f6;
-      color: #64b5f6;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(100, 200, 255, 0.15);
+      background: #f9f9f9;
+      border-color: #d0d0d0;
     }
 
     .auth-mode-switch {
       text-align: center;
       margin-top: 24px;
-      font-size: 13px;
-      color: #94a3b8;
+      font-size: 14px;
+      color: #666666;
     }
 
     .auth-mode-switch a {
-      color: #64b5f6;
+      color: #000000;
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      transition: color 0.3s ease;
-      letter-spacing: 0.3px;
     }
 
     .auth-mode-switch a:hover {
-      color: #a5d6ff;
       text-decoration: underline;
     }
 
@@ -395,43 +255,25 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: #cbd5e1;
+      color: #666666;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
       margin-bottom: 28px;
-      transition: all 0.3s ease;
       cursor: pointer;
-      letter-spacing: 0.3px;
     }
 
     .auth-back-link:hover {
-      color: #64b5f6;
-      transform: translateX(-4px);
+      color: #000000;
     }
 
     #auth-message {
       padding: 14px 16px;
-      border-radius: 12px;
-      font-size: 13px;
+      border-radius: 8px;
+      font-size: 14px;
       margin-top: 20px;
       display: none;
       text-align: center;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(100, 200, 255, 0.2);
-      animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      letter-spacing: 0.3px;
-    }
-
-    @keyframes slide-in {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     #auth-message.show {
@@ -439,15 +281,15 @@
     }
 
     #auth-message.error {
-      background: rgba(244, 63, 94, 0.1);
-      color: #ff6b7a;
-      border-color: rgba(244, 63, 94, 0.3);
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #f87171;
     }
 
     #auth-message.success {
-      background: rgba(16, 185, 129, 0.1);
-      color: #2dd4bf;
-      border-color: rgba(16, 185, 129, 0.3);
+      background: #dcfce7;
+      color: #16a34a;
+      border: 1px solid #86efac;
     }
 
     #auth-signup-mode,
@@ -456,51 +298,34 @@
     }
 
     .auth-page-title {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 700;
-      color: #ffffff;
+      color: #000000;
       margin-bottom: 24px;
       letter-spacing: -0.02em;
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
       .auth-card {
-        padding: 28px;
+        padding: 24px;
       }
-
-      .auth-title {
-        font-size: 24px;
-      }
-
       .auth-oauth-row {
         grid-template-columns: 1fr;
-      }
-
-      .auth-logo {
-        width: 70px;
-        height: 70px;
-        font-size: 30px;
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- Animated particle field -->
-  <div class="particle-field" id="particleField"></div>
-
-  <!-- Glassmorphic orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-
   <!-- Auth Container -->
   <div id="auth-root">
     <div class="auth-container">
       <!-- Header -->
       <div class="auth-header">
-        <div class="auth-logo logo-text">ERROR FREE</div>
-        <h1 class="auth-title">Coderefine</h1>
+        <div class="auth-header-row">
+          <div class="auth-logo">{}</div>
+          <h1 class="auth-title">CodeRefine</h1>
+        </div>
         <p class="auth-subtitle">AI-powered code refinement workbench</p>
       </div>
 
@@ -520,8 +345,7 @@
                   <label>Password</label>
                   <a onclick="switchMode('forgot')" class="forgot-link">Forgot?</a>
                 </div>
-                <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••"
-                  required />
+                <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" required />
               </div>
               <div class="checkbox-group">
                 <input id="login-remember" type="checkbox" />
@@ -535,25 +359,16 @@
             <div class="auth-oauth-row">
               <button type="button" class="auth-oauth-btn btn-google-login" id="btn-google-login">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4" />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853" />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05" />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335" />
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Google
               </button>
               <button type="button" class="auth-oauth-btn btn-github-login" id="btn-github-login">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
-                  <path
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                  <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
                 GitHub
               </button>
@@ -582,8 +397,7 @@
               </div>
               <div class="auth-field">
                 <label>Password</label>
-                <input id="signup-password" type="password" autocomplete="new-password" placeholder="••••••••"
-                  required />
+                <input id="signup-password" type="password" autocomplete="new-password" placeholder="••••••••" required />
               </div>
               <button type="submit" class="auth-submit" id="btn-signup-submit">Create Account</button>
             </form>
@@ -593,25 +407,16 @@
             <div class="auth-oauth-row">
               <button type="button" class="auth-oauth-btn btn-google-login">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4" />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853" />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05" />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335" />
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Google
               </button>
               <button type="button" class="auth-oauth-btn btn-github-login">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
-                  <path
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                  <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
                 GitHub
               </button>
@@ -654,39 +459,6 @@
     </div>
   </div>
 
-  <!-- Particle animation script -->
-  <script>
-    // Create animated particles
-    function createParticles() {
-      const field = document.getElementById('particleField');
-      const particleCount = 40;
-
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.opacity = Math.random() * 0.4 + 0.1;
-        particle.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`;
-        field.appendChild(particle);
-      }
-
-      // Add keyframe animation for particles
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.6; }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Initialize particles on load
-    document.addEventListener('DOMContentLoaded', () => {
-      createParticles();
-    });
-  </script>
   <script src="./auth.js"></script>
 </body>
 

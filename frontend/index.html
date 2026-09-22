@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
-
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <title>Coderefine – AI Code Refinement Workbench</title>
@@ -9,437 +8,706 @@
   <link rel="stylesheet" href="./styles.css?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg-color: #ffffff;
+      --text-main: #000000;
+      --text-muted: #666666;
+      --text-light: #999999;
+      --border-color: #eaeaea;
+      --btn-dark-bg: #111111;
+      --btn-dark-text: #ffffff;
+      --btn-light-bg: #ffffff;
+      --btn-light-border: #e0e0e0;
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
-      position: relative;
-      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Animated background particles */
-    .particle-field {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      border-bottom: 1px solid var(--border-color);
+      background: #ffffff;
     }
 
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: radial-gradient(circle, rgba(100, 200, 255, 0.8), rgba(100, 200, 255, 0));
-      border-radius: 50%;
-      pointer-events: none;
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    /* Glassmorphic gradient orbs */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: 2;
+    .logo-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--text-main);
+      color: white;
+      border-radius: 6px;
+    }
+    
+    .logo-icon svg {
+      width: 16px;
+      height: 16px;
     }
 
-    .orb-1 {
-      width: 400px;
-      height: 400px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      top: -100px;
-      left: -100px;
-      animation: float-slow 20s ease-in-out infinite;
+    .wordmark {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
     }
 
-    .orb-2 {
-      width: 350px;
-      height: 350px;
-      background: linear-gradient(135deg, #06b6d4, #0891b2);
-      bottom: -50px;
-      right: -50px;
-      animation: float-slow 25s ease-in-out infinite reverse;
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
     }
 
-    .orb-3 {
-      width: 300px;
-      height: 300px;
-      background: linear-gradient(135deg, #ec4899, #f43f5e);
-      top: 50%;
-      right: 10%;
-      animation: float-slow 22s ease-in-out infinite;
-      animation-delay: -10s;
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      cursor: pointer;
     }
 
-    @keyframes float-slow {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(50px, -50px); }
-      50% { transform: translate(-30px, 30px); }
-      75% { transform: translate(30px, 20px); }
+    .nav-link:hover {
+      color: var(--text-main);
     }
 
-    /* Content wrapper */
-    .content-wrapper {
-      position: relative;
-      z-index: 10;
+    .nav-btn {
+      text-decoration: none;
+      background-color: var(--btn-dark-bg) !important;
+      color: var(--btn-dark-text) !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      transition: opacity 0.2s;
+      background-image: none !important;
+      border: none !important;
+    }
+
+    .nav-btn:hover {
+      opacity: 0.9;
+    }
+
+    .hero {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-
-    .landing-hero {
-      max-width: 900px;
       text-align: center;
-      animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 80px 20px;
     }
 
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100px;
-      height: 100px;
-      border-radius: 30px;
-      margin: 0 auto 40px;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2));
-      border: 2px solid rgba(79, 70, 229, 0.4);
-      font-size: 42px;
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
       font-weight: 800;
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      background: linear-gradient(135deg, #64b5f6, #9c27b0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      position: relative;
-      animation: logo-pulse 3s ease-in-out infinite;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      max-width: 800px;
+      margin-bottom: 24px;
+      color: var(--text-main);
     }
 
-    @keyframes logo-pulse {
-      0%, 100% {
-        box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 0 40px rgba(79, 70, 229, 0.6);
-        transform: scale(1.05);
-      }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 640px;
+      margin-bottom: 40px;
     }
 
-    .landing-hero h1 {
-      font-family: 'Sora', sans-serif;
-      font-size: clamp(2.5rem, 8vw, 5.5rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 30px;
-      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 50%, #c7d2fe 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      position: relative;
-    }
-
-    .highlight {
-      background: linear-gradient(120deg, #64b5f6 0%, #a855f7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: inline;
-    }
-
-    .landing-hero p {
-      font-size: clamp(1rem, 3vw, 1.3rem);
-      color: #cbd5e1;
-      line-height: 1.8;
-      margin-bottom: 50px;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-      letter-spacing: 0.3px;
-    }
-
-    /* Dynamic CTA Button */
-    .cta-container {
+    .hero-buttons {
       display: flex;
-      gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 30px;
+      gap: 16px;
+      margin-bottom: 32px;
     }
 
-    .btn-start {
-      position: relative;
-      padding: 18px 40px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
+    .btn-primary, .btn-secondary {
       text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 14px 28px;
+      border-radius: 8px;
+      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: white;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4);
-      font-family: 'Sora', sans-serif;
+      justify-content: center;
+      cursor: pointer;
     }
 
-    .btn-start::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s;
+    .btn-primary {
+      background-color: var(--btn-dark-bg) !important;
+      color: var(--btn-dark-text) !important;
+      border: 1px solid var(--btn-dark-bg) !important;
+      background-image: none !important;
     }
 
-    .btn-start:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 20px 50px rgba(79, 70, 229, 0.6);
-    }
-
-    .btn-start:hover::before {
-      left: 100%;
+    .btn-primary:hover {
+      background-color: #333333;
     }
 
     .btn-secondary {
-      position: relative;
-      padding: 18px 40px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      border: 2px solid rgba(100, 200, 255, 0.5);
-      border-radius: 16px;
-      cursor: pointer;
-      background: transparent;
-      color: #64b5f6;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background-color: var(--btn-light-bg);
+      color: var(--text-main);
+      border: 1px solid var(--btn-light-border);
     }
 
     .btn-secondary:hover {
-      background: rgba(100, 200, 255, 0.1);
-      border-color: #64b5f6;
-      transform: translateY(-4px);
-      box-shadow: 0 15px 40px rgba(100, 200, 255, 0.2);
+      background-color: #f9f9f9;
+      border-color: #d0d0d0;
     }
 
-    .arrow-icon {
-      transition: transform 0.3s ease;
+    .trust-line {
+      font-family: 'Space Mono', monospace, sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      letter-spacing: 0.02em;
     }
 
-    .btn-start:hover .arrow-icon {
-      transform: translateX(4px);
-    }
-
-    .btn-secondary:hover .arrow-icon {
-      transform: translateX(4px);
-    }
-
-    /* Features row */
-    .features-row {
-      display: none;
-    }
-
-    /* Footer */
     .footer {
-      position: relative;
-      z-index: 10;
-      padding: 20px;
-      text-align: center;
-      background: linear-gradient(to top, rgba(10, 14, 39, 0.8), transparent);
-      border-top: 1px solid rgba(100, 200, 255, 0.1);
-      margin-top: 0;
-    }
-
-    .footer p {
-      color: #64748b;
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
-      transition: color 0.3s ease;
-    }
-
-    .footer p:hover {
-      color: #94a3b8;
-    }
-
-    .team-link {
-      color: #64b5f6;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      border-bottom: 1px solid transparent;
-    }
-
-    .team-link:hover {
-      border-bottom: 1px solid #64b5f6;
-      color: #a5d6ff;
-    }
-
-    /* Scroll indicator */
-    .scroll-indicator {
       display: none;
     }
 
-    /* Disable scrolling */
-    html, body {
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      opacity: 1;
+      visibility: visible;
+      transition: all 0.2s ease;
+    }
+    .modal-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 860px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 10;
+    }
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .close-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .close-btn:hover {
+      background: #f5f5f5;
+      color: var(--text-main);
+    }
+    .modal-body {
+      padding: 32px;
+    }
+    .modal-section {
+      margin-bottom: 48px;
+    }
+    .modal-section:last-child {
+      margin-bottom: 0;
+    }
+    .modal-section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    /* Code preview card */
+    .preview-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       overflow: hidden;
-      height: 100vh;
+      background: #ffffff;
+    }
+    .preview-header {
+      background: #fcfcfc;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-body {
+      padding: 20px;
+    }
+    .finding-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .finding-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .severity-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .severity-tag.critical { background: #fee2e2; color: #dc2626; border: 1px solid #f87171; }
+    .severity-tag.high { background: #fef3c7; color: #d97706; border: 1px solid #fbbf24; }
+    .severity-tag.medium { background: #dbeafe; color: #2563eb; border: 1px solid #60a5fa; }
+    .severity-tag.low { background: #f1f5f9; color: #475569; border: 1px solid #94a3b8; }
+    
+    .finding-line {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+    .finding-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .code-block {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .code-block:last-child {
+      margin-bottom: 0;
+    }
+    .code-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      background: #fcfcfc;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-label .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-green { background: #22c55e; }
+    
+    .code-block pre {
+      margin: 0;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      background: #ffffff;
+      color: #333333;
+      line-height: 1.6;
+    }
+    .code-block pre code {
+      display: block;
+    }
+    .code-dim { color: #999999; margin-right: 12px; user-select: none; }
+    
+    /* Severity Table */
+    .sev-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .sev-header {
+      display: flex;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    .sev-row {
+      display: flex;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-color);
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .sev-row:last-child {
+      border-bottom: none;
+    }
+    .sev-col-tag { width: 100px; flex-shrink: 0; }
+    .sev-col-desc { flex: 1; }
+    .sev-col-desc strong { display: block; margin-bottom: 6px; font-size: 0.95rem; color: var(--text-main); }
+    .sev-col-desc p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+    .sev-col-action { flex: 1; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+    
+    /* Steps Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .step-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .step-num {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    .step-card strong {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+    .step-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    
+    /* Tech Grid */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .tech-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .tech-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: lowercase;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+    .tech-card strong {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--text-main);
+      color: var(--text-main);
+    }
+    .tech-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
     }
 
-    /* Responsive */
+    .modal-footer-cta {
+      display: flex;
+      justify-content: center;
+      margin-top: 48px;
+    }
+
     @media (max-width: 768px) {
-      .landing-hero h1 {
-        font-size: 2.2rem;
+      .hero h1 {
+        font-size: 2.5rem;
       }
-
-      .cta-container {
+      .navbar {
+        padding: 16px 20px;
+      }
+      .hero-buttons {
         flex-direction: column;
-        align-items: center;
-      }
-
-      .btn-start, .btn-secondary {
         width: 100%;
-        justify-content: center;
+        max-width: 300px;
       }
-
-      .features-row {
-        gap: 20px;
+      .btn-primary, .btn-secondary {
+        width: 100%;
       }
-
-      .scroll-indicator {
+      
+      .steps-grid, .tech-grid {
+        grid-template-columns: 1fr;
+      }
+      .sev-header {
         display: none;
       }
+      .sev-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .sev-col-tag { width: auto; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Animated particle field -->
-  <div class="particle-field" id="particleField"></div>
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="logo-icon" style="font-family: 'Space Mono', monospace; font-size: 16px; font-weight: bold; padding-bottom: 2px;">
+        {}
+      </div>
+      <div class="wordmark">CodeRefine</div>
+    </div>
+    <div class="nav-right">
+      <a onclick="document.getElementById('aboutModal').classList.remove('hidden')" class="nav-link">About</a>
+      <a href="auth.html" class="nav-btn">Start refining</a>
+    </div>
+  </nav>
 
-  <!-- Glassmorphic orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+  <main class="hero">
+    <h1>Ship better code,<br/>faster than ever.</h1>
+    <p>Coderefine is an AI-powered workbench providing instant refinements, insights, and chat directly alongside your code. Elevate your development workflow with intelligent assistance.</p>
+    
+    <div class="hero-buttons">
+      <a href="auth.html" class="btn-primary">Start refining</a>
+      <a onclick="document.getElementById('aboutModal').classList.remove('hidden')" class="btn-secondary">About</a>
+    </div>
+    
+    <div class="trust-line">
+      Secure AI workbench. Your code is processed securely in-session.
+    </div>
+  </main>
 
-  <!-- Main content -->
-  <div class="content-wrapper">
-    <div class="landing-hero">
-      <div class="logo-badge logo-text">ERROR FREE</div>
-      
-      <h1>
-        Ship better code,<br />
-        <span class="highlight">faster than ever.</span>
-      </h1>
-      
-      <p>
-        Coderefine is an AI‑powered workbench providing instant refinements, insights, and chat directly alongside your code. Elevate your development workflow with intelligent assistance.
-      </p>
+  <!-- Footer removed as requested -->
 
-      <div class="cta-container">
-        <a href="auth.html" class="btn-start">
-          Start Refining
-          <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18l-6-6 6-6" />
+              <path d="M15 6l6 6-6 6" />
+            </svg>
+          </div>
+          About CodeRefine
+        </div>
+        <button class="close-btn" onclick="document.getElementById('aboutModal').classList.add('hidden')">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-        </a>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        
+        <section class="modal-section">
+          <h2>Sample Review Findings</h2>
+          <p class="section-desc">Interactive preview of automated findings with clear severity flags and defended patch suggestions.</p>
+          <div class="preview-card">
+            <div class="preview-header">
+              <span>orders_api.py</span>
+              <span>•</span>
+              <span>3 Findings</span>
+              <span>•</span>
+              <span>scanned in 1.4s</span>
+            </div>
+            <div class="preview-body">
+              <div class="finding-header">
+                <div class="finding-title">
+                  <span class="severity-tag critical">CRITICAL</span>
+                  <span>User input concatenated into a query</span>
+                </div>
+                <span class="finding-line">Line 61</span>
+              </div>
+              <p class="finding-desc">The user parameter comes straight from the URL and is formatted into the SQL string, so a crafted value can read or drop any table this connection can reach.</p>
+              
+              <div class="code-block">
+                <div class="code-label"><span class="dot dot-red"></span>Found</div>
+                <pre><code><span class="code-dim">60</span>def list_orders(user: str):
+<span class="code-dim">61</span>    q = f"SELECT * FROM orders WHERE user='{user}'"
+<span class="code-dim">62</span>    return db.execute(q).fetchall()</code></pre>
+              </div>
+              
+              <div class="code-block">
+                <div class="code-label"><span class="dot dot-green"></span>Refined</div>
+                <pre><code><span class="code-dim">60</span>def list_orders(user: str):
+<span class="code-dim">61</span>    q = "SELECT * FROM orders WHERE user = :user"
+<span class="code-dim">62</span>    return db.execute(q, {"user": user}).fetchall()</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h2>Severity Classification</h2>
+          <p class="section-desc">Every finding is categorized before you see it, so you fix critical vulnerabilities first.</p>
+          <div class="sev-table">
+            <div class="sev-header">
+              <div class="sev-col-tag">Severity</div>
+              <div class="sev-col-desc">What lands here</div>
+              <div class="sev-col-action">What CodeRefine does</div>
+            </div>
+            <div class="sev-row">
+              <div class="sev-col-tag"><span class="severity-tag critical">CRITICAL</span></div>
+              <div class="sev-col-desc">
+                <strong>Exploitable from outside</strong>
+                <p>Injection, unsafe deserialization, auth bypass, eval on user input.</p>
+              </div>
+              <div class="sev-col-action">Blocks the summary, shows the patched line, names the attack path.</div>
+            </div>
+            <div class="sev-row">
+              <div class="sev-col-tag"><span class="severity-tag high">HIGH</span></div>
+              <div class="sev-col-desc">
+                <strong>Leaks or crashes under load</strong>
+                <p>Committed secrets, missing validation, swallowed exceptions, unbounded reads.</p>
+              </div>
+              <div class="sev-col-action">Patched line plus the config or guard you'd need alongside it.</div>
+            </div>
+            <div class="sev-row">
+              <div class="sev-col-tag"><span class="severity-tag medium">MEDIUM</span></div>
+              <div class="sev-col-desc">
+                <strong>Costs you later</strong>
+                <p>N+1 queries, duplicated logic, functions doing four jobs, dead branches.</p>
+              </div>
+              <div class="sev-col-action">Suggests the refactor, keeps behavior identical.</div>
+            </div>
+            <div class="sev-row">
+              <div class="sev-col-tag"><span class="severity-tag low">LOW</span></div>
+              <div class="sev-col-desc">
+                <strong>Readability</strong>
+                <p>Naming, missing type hints, comments that no longer match the code.</p>
+              </div>
+              <div class="sev-col-action">Grouped into one collapsed list so it doesn't drown the rest.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h2>How It Works</h2>
+          <p class="section-desc">Four steps, one screen. The editor stays open the whole time.</p>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-num">01</div>
+              <strong>Paste or drop a file</strong>
+              <p>The editor takes a snippet, a file, or a diff. Syntax highlighting picks up the language automatically.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">02</div>
+              <strong>Analyze</strong>
+              <p>The agent walks the code for security, correctness, and structure issues, then classifies each by severity.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">03</div>
+              <strong>Apply refinements</strong>
+              <p>Every finding arrives with a rewritten line. Accept what you agree with; the rest stay untouched.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">04</div>
+              <strong>Ask follow-up</strong>
+              <p>Chat sits next to the code with the file already in context for deep dive explanations.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="modal-section">
+          <h2>Built with Modern Tech</h2>
+          <p class="section-desc">A compact, robust stack engineered for performance and precision.</p>
+          <div class="tech-grid">
+            <div class="tech-card">
+              <div class="tech-label">API</div>
+              <strong>FastAPI</strong>
+              <p>One async service handling analysis requests, streaming results back as each finding resolves.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-label">Inference</div>
+              <strong>Groq</strong>
+              <p>Low-latency LLM calls, keeping full file reviews under a couple of seconds.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-label">Editor</div>
+              <strong>CodeMirror 6</strong>
+              <p>Real editing surface with inline gutter markers for contextual findings.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-label">Storage</div>
+              <strong>Supabase</strong>
+              <p>Optional persistence for review history across sessions without lock-in.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="modal-footer-cta">
+          <a href="auth.html" class="btn-primary">Start refining</a>
+        </div>
       </div>
     </div>
-
-    <div class="scroll-indicator" id="scrollIndicator"></div>
   </div>
 
-  <!-- Footer with team credit -->
-  <footer class="footer">
-    <p>Crafted with ❤️ by <span class="team-link">Team AlphaRefine</span></p>
-  </footer>
-
-  <!-- Particle animation script -->
   <script>
-    // Create animated particles
-    function createParticles() {
-      const field = document.getElementById('particleField');
-      const particleCount = 50;
-
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.opacity = Math.random() * 0.5 + 0.2;
-        particle.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`;
-        field.appendChild(particle);
+    // Close modal when clicking outside of it
+    document.getElementById('aboutModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.add('hidden');
       }
-
-      // Add keyframe animation for particles
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 0.8; }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Hide scroll indicator on scroll
-    // Scrolling is disabled, so this is not needed
-    let hasScrolled = false;
-
-    // Initialize particles on load
-    document.addEventListener('DOMContentLoaded', () => {
-      createParticles();
     });
 
-    // Auth check
     document.addEventListener("DOMContentLoaded", async () => {
       const config = window.CODEREFINE_CONFIG || {};
       if (config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase) {
@@ -452,5 +720,4 @@
     });
   </script>
 </body>
-
 </html>
