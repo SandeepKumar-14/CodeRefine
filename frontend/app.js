@@ -112,8 +112,7 @@ function switchTab(id) {
       const runOutput = document.getElementById("run-output");
       if (runInput) oldTab.runInput = runInput.value;
       if (runOutput) {
-        oldTab.runOutput = runOutput.textContent;
-        oldTab.runOutputError = runOutput.classList.contains("error");
+        oldTab.runOutputHTML = runOutput.innerHTML;
       }
     }
   }
@@ -173,9 +172,7 @@ function switchTab(id) {
     
     if (runInput) runInput.value = newTab.runInput || "";
     if (runOutput) {
-      runOutput.textContent = newTab.runOutput || "";
-      if (newTab.runOutputError) runOutput.classList.add("error");
-      else runOutput.classList.remove("error");
+      runOutput.innerHTML = newTab.runOutputHTML || "";
     }
     if (runInputWarning) {
       runInputWarning.style.display = newTab.inputWarningShown ? "block" : "none";
@@ -1662,6 +1659,15 @@ function initRunButton() {
     });
   }
   
+  const btnClearConsole = document.getElementById("btn-clear-console");
+  if (btnClearConsole) {
+    btnClearConsole.addEventListener("click", () => {
+      if (runOutput) runOutput.innerHTML = "";
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab) tab.runOutputHTML = "";
+    });
+  }
+  
   if (btnCopyOutput) {
     btnCopyOutput.addEventListener("click", () => {
       const outText = runOutput.textContent;
@@ -1730,8 +1736,13 @@ function initRunButton() {
       runPanel.style.display = "flex";
     }
     
-    runOutput.textContent = "Running...";
-    runOutput.classList.remove("error");
+    const runningSpan = document.createElement("div");
+    runningSpan.textContent = `\n> running ${tab.filename}...`;
+    runningSpan.style.color = "#8b5cf6";
+    runOutput.appendChild(runningSpan);
+    
+    // Auto scroll
+    runOutput.parentElement.scrollTop = runOutput.parentElement.scrollHeight;
     btnRun.classList.add("running");
     btnRun.disabled = true;
     
@@ -1756,26 +1767,26 @@ function initRunButton() {
       
       const data = await res.json();
       
-      runOutput.textContent = data.output || "(No output)";
-      if (data.exitCode === 0) {
-        runOutput.classList.remove("error");
-        if (tab) tab.runOutputError = false;
-      } else {
-        runOutput.classList.add("error");
-        if (tab) tab.runOutputError = true;
-      }
+      runningSpan.textContent = `> ran ${tab.filename} (exit: ${data.exitCode})\n`;
       
-      if (tab) tab.runOutput = runOutput.textContent;
+      const outSpan = document.createElement("div");
+      outSpan.className = data.exitCode === 0 ? "stdout" : "stderr";
+      outSpan.textContent = data.output || "(No output)\n";
+      runOutput.appendChild(outSpan);
+      
+      if (tab) tab.runOutputHTML = runOutput.innerHTML;
       
     } catch(err) {
       console.error(err);
-      runOutput.textContent = err.message || "Failed to execute code.";
-      runOutput.classList.add("error");
-      if (tab) {
-        tab.runOutputError = true;
-        tab.runOutput = runOutput.textContent;
-      }
+      runningSpan.textContent = `> failed to run ${tab.filename}\n`;
+      const errSpan = document.createElement("div");
+      errSpan.className = "stderr";
+      errSpan.textContent = err.message || "Failed to execute code.\n";
+      runOutput.appendChild(errSpan);
+      
+      if (tab) tab.runOutputHTML = runOutput.innerHTML;
     } finally {
+      runOutput.parentElement.scrollTop = runOutput.parentElement.scrollHeight;
       btnRun.classList.remove("running");
       btnRun.disabled = false;
     }
