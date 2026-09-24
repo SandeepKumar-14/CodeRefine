@@ -81,10 +81,10 @@ class ExecuteRequest(BaseModel):
 
 
 class ExecuteResponse(BaseModel):
+    stdout: str
+    stderr: str
+    exitCode: int
     output: str
-    statusCode: int
-    memory: Optional[str] = None
-    cpuTime: Optional[str] = None
 
 
 def get_groq_client() -> Groq:
@@ -466,72 +466,66 @@ def chat_vision(payload: ChatVisionRequest, user = Depends(get_current_user)) ->
     return ChatResponse(reply=reply)
 
 
-JDOODLE_API = "https://api.jdoodle.com/v1/execute"
+PISTON_URL = os.getenv("PISTON_URL", "http://localhost:2000").rstrip("/")
 
 @app.post("/api/execute", response_model=ExecuteResponse)
 async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)):
-    client_id = os.getenv("JDOODLE_CLIENT_ID")
-    client_secret = os.getenv("JDOODLE_CLIENT_SECRET")
-    
-    if not client_id or not client_secret:
-        raise HTTPException(status_code=500, detail="JDoodle credentials not configured on the server.")
-        
     lang_map = {
-        "python": {"language": "python3", "versionIndex": "6"},
-        "javascript": {"language": "nodejs", "versionIndex": "3"},
-        "java": {"language": "java", "versionIndex": "4"},
-        "c": {"language": "c", "versionIndex": "7"},
-        "cpp": {"language": "cpp", "versionIndex": "8"},
-        "rust": {"language": "rust", "versionIndex": "6"}
+        "python": {"language": "python", "version": "3.10.0"},
+        "javascript": {"language": "node", "version": "18.15.0"},
+        "java": {"language": "java", "version": "15.0.2"},
+        "c": {"language": "gcc", "version": "10.2.0"},
+        "cpp": {"language": "gcc", "version": "10.2.0"},
+        "rust": {"language": "rust", "version": "1.68.2"}
     }
     
-    jdoodle_lang = lang_map.get(payload.language.lower())
-    if not jdoodle_lang:
-        raise HTTPException(status_code=400, detail=f"Language '{payload.language}' is not mapped for JDoodle.")
+    piston_lang = lang_map.get(payload.language.lower())
+    if not piston_lang:
+        raise HTTPException(status_code=400, detail=f"Language '{payload.language}' is not mapped for execution.")
         
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(
-                JDOODLE_API,
+                f"{PISTON_URL}/api/v2/execute",
                 json={
-                    "clientId": client_id,
-                    "clientSecret": client_secret,
-                    "script": payload.code,
-                    "language": jdoodle_lang["language"],
-                    "versionIndex": jdoodle_lang["versionIndex"],
-                    "stdin": payload.stdin or ""
+                    "language": piston_lang["language"],
+                    "version": piston_lang["version"],
+                    "files": [
+                        {"content": payload.code}
+                    ],
+                    "stdin": payload.stdin or "",
+                    "run_timeout": 5000,
+                    "compile_timeout": 10000
                 }
             )
-            print(f"JDoodle Raw Response Text: {resp.text}")
             resp.raise_for_status()
             data = resp.json()
-            print(f"JDoodle Raw JSON: {data}")
             
-            error_val = data.get("error")
-            if error_val is not None:
-                return ExecuteResponse(output=f"Execution service error: {error_val}", statusCode=data.get("statusCode", 400))
-                
-            output_val = data.get("output")
-            if output_val is None:
-                status_code = data.get("statusCode", 500)
-                msg = data.get("message")
-                if msg:
-                    out_text = f"Execution service error: {msg}"
-                else:
-                    out_text = f"Execution failed, please try again. (Raw response: {data})"
-                return ExecuteResponse(output=out_text, statusCode=status_code)
+            compile_result = data.get("compile", {})
+            run_result = data.get("run", {})
+            
+            if compile_result and compile_result.get("code") != 0:
+                exit_code = compile_result.get("code", 1)
+                stdout = compile_result.get("stdout", "")
+                stderr = compile_result.get("stderr", "")
+                output = compile_result.get("output", "")
+            else:
+                exit_code = run_result.get("code", 1) if run_result else 1
+                stdout = run_result.get("stdout", "")
+                stderr = run_result.get("stderr", "")
+                output = run_result.get("output", "")
                 
             return ExecuteResponse(
-                output=str(output_val),
-                statusCode=data.get("statusCode", 200),
-                memory=data.get("memory") and str(data.get("memory")),
-                cpuTime=data.get("cpuTime") and str(data.get("cpuTime"))
+                stdout=stdout,
+                stderr=stderr,
+                exitCode=exit_code,
+                output=output
             )
             
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Execution timed out after 15 seconds.")
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"JDoodle API error: {e.response.text}")
+        raise HTTPException(status_code=e.response.status_code, detail=f"Execution API error: {e.response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
 

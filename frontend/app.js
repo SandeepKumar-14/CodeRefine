@@ -1742,7 +1742,7 @@ function initRunButton() {
       const data = await res.json();
       
       runOutput.textContent = data.output || "(No output)";
-      if (data.statusCode === 200) {
+      if (data.exitCode === 0) {
         runOutput.classList.remove("error");
         if (tab) tab.runOutputError = false;
       } else {
