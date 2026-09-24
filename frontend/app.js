@@ -1295,6 +1295,12 @@ function initInsightsFilters() {
   });
 }
 
+function extractRefinedCode(rawText) {
+  if (!rawText) return rawText;
+  var match = rawText.match(/```[^\n]*\r?\n([\s\S]*?)\r?\n```/);
+  return match ? match[1] : rawText;
+}
+
 /* ── REFINE BUTTON ─────────────────────────────────────────── */
 function initRefineButton() {
   var button     = document.getElementById("btn-refine");
@@ -1327,7 +1333,8 @@ function initRefineButton() {
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
       var data    = await res.json();
-      var refined = data.refined_code || code;
+      var rawRefined = data.refined_code || code;
+      var refined = extractRefinedCode(rawRefined);
       editor.setValue(refined);
       updateMetrics();
       applyInsights(data.summary, data.suggestions);

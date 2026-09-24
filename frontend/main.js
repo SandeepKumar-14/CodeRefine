@@ -372,6 +372,12 @@ function applyInsights(summary, suggestions) {
   if (insightsPanel)  insightsPanel.classList.remove("side-panel-body-hidden");
 }
 
+function extractRefinedCode(rawText) {
+  if (!rawText) return rawText;
+  const match = rawText.match(/```[^\n]*\r?\n([\s\S]*?)\r?\n```/);
+  return match ? match[1] : rawText;
+}
+
 /* ── REFINE BUTTON ─────────────────────────────────────────── */
 function initRefineButton() {
   const button     = document.getElementById("btn-refine");
@@ -403,7 +409,8 @@ function initRefineButton() {
       const data = await res.json();
 
       // Animate editor value replacement
-      const refined = data.refined_code || code;
+      const rawRefined = data.refined_code || code;
+      const refined = extractRefinedCode(rawRefined);
       editor.setValue(refined);
       updateMetrics();
       applyInsights(data.summary, data.suggestions);
