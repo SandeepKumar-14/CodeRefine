@@ -504,13 +504,19 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
             compile_result = data.get("compile", {})
             run_result = data.get("run", {})
             
-            if compile_result and compile_result.get("code") != 0:
-                exit_code = compile_result.get("code", 1)
+            if compile_result and compile_result.get("code") not in (0, None):
+                exit_code = compile_result.get("code")
+                if exit_code is None:
+                    exit_code = 1
                 stdout = compile_result.get("stdout", "")
                 stderr = compile_result.get("stderr", "")
                 output = compile_result.get("output", "")
             else:
-                exit_code = run_result.get("code", 1) if run_result else 1
+                exit_code = run_result.get("code")
+                if exit_code is None:
+                    exit_code = compile_result.get("code")
+                if exit_code is None:
+                    exit_code = 0
                 stdout = run_result.get("stdout", "")
                 stderr = run_result.get("stderr", "")
                 output = run_result.get("output", "")
