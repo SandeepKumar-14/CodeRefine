@@ -46,7 +46,7 @@ function createTab(filename = null, language = "python") {
     filename: filename || ("scratch" + (tabCounter > 1 ? tabCounter : "") + "." + (LANG_EXT[language] || language)),
     language: language,
     objective: "General Polish",
-    code: "# Paste or type code here to refine it.\n\n",
+    code: getDefaultCode(language),
     originalCode: "",
     refinedCode: "",
     runInput: "",
@@ -70,7 +70,7 @@ function closeTab(id, event) {
   if (tabIndex === -1) return;
   const tab = tabs[tabIndex];
   
-  if (tab.code !== "# Paste or type code here to refine it.\n\n" && tab.code.trim() !== "") {
+  if (tab.code !== getDefaultCode(tab.language) && tab.code.trim() !== "") {
     if (!confirm(`Close ${tab.filename}? Unsaved changes will be lost.`)) return;
   }
   
@@ -257,6 +257,10 @@ const LANG_MONACO = {
   c: "c", cpp: "cpp", rust: "cpp",
 };
 
+function getDefaultCode(lang) {
+  return (lang === "python" ? "#" : "//") + " Paste or type code here to refine it.\n\n";
+}
+
 function updateFileNameBadge() {
   const t = tabs.find(t => t.id === activeTabId);
   if (t) {
@@ -389,7 +393,7 @@ function initEditor() {
   var wordWrap = localStorage.getItem("coderefine:wordWrap") !== "off" ? "on" : "off";
   var tabSize  = parseInt(localStorage.getItem("coderefine:tabSize") || "4", 10);
   editor = monaco.editor.create(container, {
-    value:               "# Paste or type code here to refine it.\n\n",
+    value:               getDefaultCode(currentLanguage),
     language:            languageToMonaco(currentLanguage),
     theme:               localStorage.getItem("coderefine:theme") === "light" ? "vs" : "vs-dark",
     automaticLayout:     true,
@@ -511,9 +515,13 @@ function initLanguageSelect() {
   var select = document.getElementById("language-select");
   if (!select) return;
   select.addEventListener("change", function() {
+    const oldLang = currentLanguage;
     currentLanguage = select.value;
     if (editor && window.monaco) {
       monaco.editor.setModelLanguage(editor.getModel(), languageToMonaco(currentLanguage));
+      if (editor.getValue() === getDefaultCode(oldLang)) {
+        editor.setValue(getDefaultCode(currentLanguage));
+      }
     }
     updateFileNameBadge();
     var langEl = document.getElementById("metric-language");
@@ -1294,7 +1302,7 @@ function initRefineButton() {
   if (!button) return;
   button.addEventListener("click", async function() {
     var code = editor.getValue().trim();
-    if (!code || code === "# Paste or type code here to refine it.") {
+    if (!code || code === getDefaultCode(currentLanguage).trim()) {
       appendChatBubble("system", "Add some code in the editor before refining.");
       switchAIPanel("assistant");
       return;
@@ -1688,7 +1696,7 @@ function initRunButton() {
     if (!editor || !btnRun) return;
     
     const code = editor.getValue().trim();
-    if (!code || code === "# Paste or type code here to refine it.") {
+    if (!code || code === getDefaultCode(currentLanguage).trim()) {
       showToast("Add some code to run.", "warning");
       return;
     }

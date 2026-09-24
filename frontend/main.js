@@ -125,11 +125,15 @@ function initThemeSwitcher() {
   });
 }
 
+function getDefaultCode(lang) {
+  return (lang === "python" ? "#" : "//") + " Paste or type code here to refine it.\n\n";
+}
+
 /* ── EDITOR ────────────────────────────────────────────────── */
 function initEditor() {
   const container = document.getElementById("editor-container");
   editor = monaco.editor.create(container, {
-    value:               "# Paste or type code here to refine it.\n\n",
+    value:               getDefaultCode(currentLanguage),
     language:            languageToMonaco(currentLanguage),
     theme:               "vs-dark",
     automaticLayout:     true,
@@ -161,9 +165,13 @@ function initEditor() {
 function initLanguageSelect() {
   const select = document.getElementById("language-select");
   select.addEventListener("change", () => {
+    const oldLang = currentLanguage;
     currentLanguage = select.value;
     if (editor && window.monaco) {
       monaco.editor.setModelLanguage(editor.getModel(), languageToMonaco(currentLanguage));
+      if (editor.getValue() === getDefaultCode(oldLang)) {
+        editor.setValue(getDefaultCode(currentLanguage));
+      }
     }
     updateFileNameBadge();
     document.getElementById("metric-language").textContent =
