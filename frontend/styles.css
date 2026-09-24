@@ -2,23 +2,23 @@
 
 /* ── TOKENS ────────────────────────────────────────────────── */
 :root {
-  --bg: #09090b;
-  --bg-elevated: #18181b;
-  --bg-glass: rgba(24, 24, 27, 0.75);
-  --bg-overlay: rgba(9, 9, 11, 0.9);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-bright: rgba(255, 255, 255, 0.15);
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.15);
+  --bg: #040810;
+  --bg-elevated: #080f1c;
+  --bg-glass: rgba(8, 15, 28, 0.72);
+  --bg-overlay: rgba(4, 8, 16, 0.88);
+  --border: rgba(99, 122, 180, 0.18);
+  --border-bright: rgba(99, 122, 180, 0.38);
+  --accent: #ffffff;
+  --accent-soft: rgba(59, 130, 246, 0.14);
   --accent-glow: transparent;
-  --accent2: #3b82f6;
-  --accent2-soft: rgba(59, 130, 246, 0.15);
-  --teal: #0d9488;
-  --teal-soft: rgba(13, 148, 136, 0.15);
-  --fg: #f4f4f5;
-  --fg-muted: #a1a1aa;
-  --fg-dim: #71717a;
-  --danger: #ef4444;
+  --accent2: #eeeeee;
+  --accent2-soft: rgba(139, 92, 246, 0.14);
+  --teal: #14b8a6;
+  --teal-soft: rgba(20, 184, 166, 0.14);
+  --fg: #eef2ff;
+  --fg-muted: #7986a8;
+  --fg-dim: #4a5578;
+  --danger: #f43f5e;
   --success: #10b981;
   --warning: #f59e0b;
   --font-display: 'Syne', sans-serif;

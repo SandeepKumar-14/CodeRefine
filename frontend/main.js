@@ -115,7 +115,7 @@ function initThemeSwitcher() {
 
       // Sync Monaco theme
       if (window.monaco) {
-        const monacoTheme = choice === "light" ? "vs" : (choice === "nebula" ? "nebula" : "coderefine-dark");
+        const monacoTheme = choice === "light" ? "vs" : "vs-dark";
         monaco.editor.setTheme(monacoTheme);
       }
 
@@ -131,7 +131,7 @@ function initEditor() {
   editor = monaco.editor.create(container, {
     value:               "# Paste or type code here to refine it.\n\n",
     language:            languageToMonaco(currentLanguage),
-    theme:               (function() { const t = document.documentElement.getAttribute("data-theme"); return t === "light" ? "vs" : (t === "nebula" ? "nebula" : "coderefine-dark"); })(),
+    theme:               "vs-dark",
     automaticLayout:     true,
     fontSize:            13.5,
     fontFamily:          "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace",
@@ -583,32 +583,6 @@ if (typeof require !== "undefined") {
   require(["vs/editor/editor.main"], () => {
     monacoReady   = true;
     window.monaco = monaco;
-    monaco.editor.defineTheme('nebula', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { background: '020617' }
-      ],
-      colors: {
-        'editor.background': '#020617',
-        'editor.lineHighlightBackground': '#0f172a',
-        'editorLineNumber.foreground': '#475569',
-        'editor.selectionBackground': '#1e293b'
-      }
-    });
-    monaco.editor.defineTheme('coderefine-dark', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { background: '09090b' }
-      ],
-      colors: {
-        'editor.background': '#09090b',
-        'editor.lineHighlightBackground': '#18181b',
-        'editorLineNumber.foreground': '#71717a',
-        'editor.selectionBackground': '#27272a'
-      }
-    });
     if (domReady && authReady) startApp();
   });
 }

@@ -371,7 +371,7 @@ function initThemeSwitcher() {
       var c = pill.getAttribute("data-theme-choice");
       html.setAttribute("data-theme", c);
       localStorage.setItem("coderefine:theme", c);
-      if (window.monaco) monaco.editor.setTheme(c === "light" ? "vs" : (c === "nebula" ? "nebula" : "coderefine-dark"));
+      if (window.monaco) monaco.editor.setTheme(c === "light" ? "vs" : "vs-dark");
       document.querySelectorAll("[data-theme-choice]").forEach(function(p) {
         p.classList.toggle("theme-pill-active", p.getAttribute("data-theme-choice") === c);
       });
@@ -391,7 +391,7 @@ function initEditor() {
   editor = monaco.editor.create(container, {
     value:               "# Paste or type code here to refine it.\n\n",
     language:            languageToMonaco(currentLanguage),
-    theme:               (function() { var t = localStorage.getItem("coderefine:theme"); return t === "light" ? "vs" : (t === "nebula" ? "nebula" : "coderefine-dark"); })(),
+    theme:               localStorage.getItem("coderefine:theme") === "light" ? "vs" : "vs-dark",
     automaticLayout:     true,
     fontSize:            savedFontSize,
     fontFamily:          "'Geist Mono', 'JetBrains Mono', ui-monospace, monospace",
@@ -2272,32 +2272,6 @@ if (typeof require !== "undefined") {
   require(["vs/editor/editor.main"], function() {
     monacoReady   = true;
     window.monaco = monaco;
-    monaco.editor.defineTheme('nebula', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { background: '020617' }
-      ],
-      colors: {
-        'editor.background': '#020617',
-        'editor.lineHighlightBackground': '#0f172a',
-        'editorLineNumber.foreground': '#475569',
-        'editor.selectionBackground': '#1e293b'
-      }
-    });
-    monaco.editor.defineTheme('coderefine-dark', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { background: '09090b' }
-      ],
-      colors: {
-        'editor.background': '#09090b',
-        'editor.lineHighlightBackground': '#18181b',
-        'editorLineNumber.foreground': '#71717a',
-        'editor.selectionBackground': '#27272a'
-      }
-    });
     if (domReady && authReady) startApp();
   });
 }
