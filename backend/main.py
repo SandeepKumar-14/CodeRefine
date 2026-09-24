@@ -472,7 +472,7 @@ PISTON_URL = os.getenv("PISTON_URL", "http://localhost:2000").rstrip("/")
 async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)):
     lang_map = {
         "python": {"language": "python", "version": "3.10.0"},
-        "javascript": {"language": "node", "version": "18.15.0"},
+        "javascript": {"language": "javascript", "version": "18.15.0"},
         "java": {"language": "java", "version": "15.0.2"},
         "c": {"language": "c", "version": "10.2.0"},
         "cpp": {"language": "c++", "version": "10.2.0"},
