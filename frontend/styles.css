@@ -51,20 +51,20 @@ html[data-theme="light"] {
 }
 
 html[data-theme="nebula"] {
-  --bg: #06001a;
-  --bg-elevated: #0e0025;
-  --bg-glass: rgba(14, 0, 37, 0.72);
-  --bg-overlay: rgba(6, 0, 26, 0.88);
-  --border: rgba(180, 99, 220, 0.2);
-  --border-bright: rgba(180, 99, 220, 0.25);
-  --accent: #a855f7;
-  --accent-soft: rgba(168, 85, 247, 0.14);
+  --bg: #020617;
+  --bg-elevated: #0f172a;
+  --bg-glass: rgba(15, 23, 42, 0.72);
+  --bg-overlay: rgba(2, 6, 23, 0.88);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.15);
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.14);
   --accent-glow: transparent;
-  --accent2: #ec4899;
-  --teal: #38bdf8;
-  --fg: #faf5ff;
-  --fg-muted: #a78fd8;
-  --fg-dim: #5e3f8a;
+  --accent2: #818cf8;
+  --teal: #2dd4bf;
+  --fg: #f8fafc;
+  --fg-muted: #94a3b8;
+  --fg-dim: #475569;
 }
 
 /* ── RESET ─────────────────────────────────────────────────── */
@@ -1021,8 +1021,8 @@ body::before {
 }
 
 [data-theme="nebula"] .select option {
-  background: #1a0d2e;
-  color: #e2d8f0;
+  background: #0f172a;
+  color: #f8fafc;
 }
 
 /* ── BUTTONS ───────────────────────────────────────────────── */
@@ -2832,7 +2832,7 @@ html[data-theme="light"] .ai-panel {
 }
 
 html[data-theme="nebula"] .ai-panel {
-  background: #0e0025;
+  background: #0f172a;
 }
 
 .ai-panel-header {
