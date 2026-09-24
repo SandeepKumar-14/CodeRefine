@@ -494,8 +494,8 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
                         {"content": payload.code}
                     ],
                     "stdin": payload.stdin or "",
-                    "run_timeout": 5000,
-                    "compile_timeout": 10000
+                    "run_timeout": 3000,
+                    "compile_timeout": 3000
                 }
             )
             resp.raise_for_status()
