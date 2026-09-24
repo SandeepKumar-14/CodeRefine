@@ -1116,8 +1116,13 @@ function appendChatBubble(role, content) {
         window.hljs.highlightElement(codeBlock);
       }
       
-      // Use event delegation for copy buttons (attached in initChatForm or startApp)
-      // We just need to add the button structure here
+      // Use event delegation for copy/open buttons
+      const openBtn = document.createElement('button');
+      openBtn.className = 'open-code-btn';
+      openBtn.title = 'Open in Editor';
+      openBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>';
+      pre.appendChild(openBtn);
+
       const btn = document.createElement('button');
       btn.className = 'copy-code-btn';
       btn.title = 'Copy code';
@@ -1466,20 +1471,52 @@ function initChatForm() {
   var thread = document.getElementById("chat-thread");
   
   if (thread) {
-    // Event delegation for copy code buttons in chat
+    // Event delegation for copy and open code buttons in chat
     thread.addEventListener('click', function(e) {
-      const btn = e.target.closest('.copy-code-btn');
-      if (!btn) return;
+      const copyBtn = e.target.closest('.copy-code-btn');
+      if (copyBtn) {
+        const pre = copyBtn.closest('pre');
+        const codeBlock = pre ? pre.querySelector('code') : null;
+        
+        if (codeBlock) {
+          navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+            const oldHtml = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => { copyBtn.innerHTML = oldHtml; }, 2000);
+          });
+        }
+        return;
+      }
       
-      const pre = btn.closest('pre');
-      const codeBlock = pre ? pre.querySelector('code') : null;
-      
-      if (codeBlock) {
-        navigator.clipboard.writeText(codeBlock.innerText).then(() => {
-          const oldHtml = btn.innerHTML;
-          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-          setTimeout(() => { btn.innerHTML = oldHtml; }, 2000);
-        });
+      const openBtn = e.target.closest('.open-code-btn');
+      if (openBtn) {
+        const pre = openBtn.closest('pre');
+        const codeBlock = pre ? pre.querySelector('code') : null;
+        if (codeBlock) {
+          let lang = 'python'; // default
+          const classes = Array.from(codeBlock.classList);
+          const langClass = classes.find(c => c.startsWith('language-'));
+          if (langClass) {
+            const hljsLang = langClass.replace('language-', '');
+            if (['java', 'python', 'c', 'cpp', 'javascript', 'rust'].includes(hljsLang)) {
+              lang = hljsLang;
+            } else if (hljsLang === 'js') {
+              lang = 'javascript';
+            } else if (hljsLang === 'c++') {
+              lang = 'cpp';
+            }
+          }
+          
+          const codeText = codeBlock.innerText;
+          const newFilename = "generated_" + Date.now() + "." + (LANG_EXT[lang] || "txt");
+          createTab(newFilename, lang);
+          setTimeout(() => {
+            if (editor) {
+              editor.setValue(codeText);
+            }
+          }, 50);
+        }
+        return;
       }
     });
   }

@@ -1475,11 +1475,10 @@ body::before {
 }
 .chat-bubble th { background: rgba(255,255,255,0.03); }
 
-/* Copy code button in markdown pre */
-.copy-code-btn {
+/* Code action buttons in markdown pre */
+.copy-code-btn, .open-code-btn {
   position: absolute;
   top: 6px;
-  right: 6px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   color: var(--fg-muted);
@@ -1493,8 +1492,10 @@ body::before {
   opacity: 0;
   transition: opacity 0.2s, background 0.2s;
 }
-.chat-bubble pre:hover .copy-code-btn { opacity: 1; }
-.copy-code-btn:hover { background: var(--bg-hover); color: var(--fg); }
+.copy-code-btn { right: 6px; }
+.open-code-btn { right: 36px; }
+.chat-bubble pre:hover .copy-code-btn, .chat-bubble pre:hover .open-code-btn { opacity: 1; }
+.copy-code-btn:hover, .open-code-btn:hover { background: var(--bg-hover); color: var(--fg); }
 
 .chat-message-user .chat-bubble {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
