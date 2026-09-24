@@ -2,12 +2,12 @@
 
 /* ── TOKENS ────────────────────────────────────────────────── */
 :root {
-  --bg: #040810;
-  --bg-elevated: #080f1c;
-  --bg-glass: rgba(8, 15, 28, 0.72);
-  --bg-overlay: rgba(4, 8, 16, 0.88);
-  --border: rgba(99, 122, 180, 0.18);
-  --border-bright: rgba(99, 122, 180, 0.38);
+  --bg: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-glass: rgba(10, 10, 10, 0.72);
+  --bg-overlay: rgba(10, 10, 10, 0.88);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-bright: rgba(255, 255, 255, 0.22);
   --accent: #ffffff;
   --accent-soft: rgba(59, 130, 246, 0.14);
   --accent-glow: transparent;
@@ -3927,3 +3927,18 @@ html[data-theme="light"] .brand-mark { color: #ffffff; }
 
 
 html[data-theme="nebula"] .brand-mark { color: #ffffff; }
+
+/* ── TARGETED DARK THEME FIXES ────────────────────────────────────────────── */
+html[data-theme="dark"] .sidebar-avatar,
+html:not([data-theme="light"]):not([data-theme="nebula"]) .sidebar-avatar {
+  background: #202020 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+html[data-theme="dark"] .chat-message-user .chat-bubble,
+html:not([data-theme="light"]):not([data-theme="nebula"]) .chat-message-user .chat-bubble {
+  background: #202020 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
