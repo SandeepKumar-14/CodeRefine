@@ -474,8 +474,9 @@ async def execute_code(payload: ExecuteRequest, user = Depends(get_current_user)
         "python": {"language": "python", "version": "3.10.0"},
         "javascript": {"language": "node", "version": "18.15.0"},
         "java": {"language": "java", "version": "15.0.2"},
-        "c": {"language": "gcc", "version": "10.2.0"},
-        "cpp": {"language": "gcc", "version": "10.2.0"},
+        "c": {"language": "c", "version": "10.2.0"},
+        "cpp": {"language": "c++", "version": "10.2.0"},
+        "c++": {"language": "c++", "version": "10.2.0"},
         "rust": {"language": "rust", "version": "1.68.2"}
     }
     
