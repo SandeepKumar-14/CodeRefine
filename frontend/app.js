@@ -876,7 +876,7 @@ function openHelpPanel() {
     + '<ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px;line-height:1.6;">'
     + '<li>Paste or type code in the <strong style="color:var(--fg);">editor</strong>.</li>'
     + '<li>Choose your <strong style="color:var(--fg);">Language</strong> and <strong style="color:var(--fg);">Objective</strong> from the top bar.</li>'
-    + '<li>Hit <strong style="color:var(--accent);">Refine with AI</strong> to get an improved version.</li>'
+    + '<li>Hit <strong style="color:var(--accent);">Refine Code</strong> to get an improved version.</li>'
     + '<li>Check the <strong style="color:var(--fg);">Insights</strong> tab for detailed suggestions.</li>'
     + '<li>Use the <strong style="color:var(--fg);">Diff</strong> tab to compare before and after.</li>'
     + '<li>Chat with the AI assistant for deeper help.</li>'
@@ -2181,7 +2181,7 @@ function startApp() {
   setInterval(pingBackend, 30000);
 
   if (getNotifications().length === 0) {
-    addNotification("Welcome to Coderefine Studio! Paste code and hit Refine with AI.", "info");
+    addNotification("Welcome to Coderefine Studio! Paste code and hit Refine Code.", "info");
   }
 }
 
